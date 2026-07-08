@@ -1,0 +1,60 @@
+# Enable mod_rewrite
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    DirectoryIndex index.php index.html
+
+    # Runtime state is consumed through PHP and must never be served directly.
+    RewriteRule ^(?:config|content|data|logs|modules|templates|backup|backups|temp|tmp)(?:/|$) - [F,L,NC]
+
+    # Exclude the admin area from routing
+    RewriteCond %{REQUEST_URI} clipon/admin/ [NC]
+    RewriteRule ^ - [L]
+
+    # Explicitly route requests to the clipon directory to its index.php
+    RewriteRule ^clipon/$ clipon/index.php [L]
+
+    # Exclude the clipon directory from routing (assets and other files)
+    RewriteCond %{REQUEST_URI} clipon/ [NC]
+    RewriteRule ^ - [L]
+
+    # Exclude static files and directories
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Exclude real PHP files (for compatibility)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_FILENAME} \.php$
+    RewriteRule ^ - [L]
+
+    # Route all other requests to the front controller
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Security
+<FilesMatch "(?i)(?:\.json|\.jsonl|\.log|\.bak|\.backup|\.old|\.orig|\.save|\.sql|\.sqlite(?:-shm|-wal)?|\.tmp|\.temp|~)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Static asset caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>

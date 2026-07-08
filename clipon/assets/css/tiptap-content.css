@@ -1,0 +1,190 @@
+/* 
+   Tiptap Content Fallback Styles 
+   These styles apply to elements rendered via the CMS to ensure basic formatting (Quotes, Codes, Lists) 
+   even if the theme doesn't provide them.
+*/
+
+.clipon-rich blockquote, body.clipon-inline-edit-mode .ProseMirror blockquote {
+    border-left: 4px solid #e2e8f0;
+    margin: 1.5rem 0;
+    padding: 0.5rem 0 0.5rem 1.5rem;
+    font-style: italic;
+    color: #4a5568;
+    background: #f8fafc;
+    border-radius: 0 4px 4px 0;
+}
+
+.clipon-rich code, body.clipon-inline-edit-mode .ProseMirror code {
+    background-color: #f1f5f9;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9em;
+    color: #e11d48;
+}
+
+.clipon-rich pre, body.clipon-inline-edit-mode .ProseMirror pre {
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.6;
+}
+
+.clipon-rich pre code, body.clipon-inline-edit-mode .ProseMirror pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+
+.clipon-rich ul, body.clipon-inline-edit-mode .ProseMirror ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.clipon-rich ol, body.clipon-inline-edit-mode .ProseMirror ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.clipon-rich li, body.clipon-inline-edit-mode .ProseMirror li {
+    margin-bottom: 0.5rem;
+}
+
+/* Fallback Table Styles */
+.clipon-rich table, body.clipon-inline-edit-mode .ProseMirror table {
+    border-collapse: collapse;
+    margin: 2rem 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 1.5;
+}
+
+.clipon-rich table td, .clipon-rich table th,
+body.clipon-inline-edit-mode .ProseMirror table td, body.clipon-inline-edit-mode .ProseMirror table th {
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    min-width: 1em;
+    position: relative;
+    text-align: left;
+}
+
+.clipon-rich table th, body.clipon-inline-edit-mode .ProseMirror table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.clipon-rich table tr:nth-child(even), body.clipon-inline-edit-mode .ProseMirror table tr:nth-child(even) {
+    background-color: #fcfdfe;
+}
+
+/* Fallback Divider Styles */
+.clipon-rich hr, body.clipon-inline-edit-mode .ProseMirror hr {
+    border: none;
+    border-top: 2px solid #f1f5f9;
+    margin: 2.5rem 0;
+}
+
+/* Fallback Video/Iframe Styles */
+.clipon-rich iframe, body.clipon-inline-edit-mode .ProseMirror iframe {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    margin: 1.5rem 0;
+}
+
+.clipon-rich .video-wrapper, body.clipon-inline-edit-mode .ProseMirror .video-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.5rem 0;
+    aspect-ratio: 16 / 9;
+}
+
+.clipon-rich .video-wrapper iframe, body.clipon-inline-edit-mode .ProseMirror .video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+}
+
+/* NodeView Resize Handles */
+.clipon-rich .node-view-video, body.clipon-inline-edit-mode .ProseMirror .node-view-video {
+    position: relative;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.clipon-rich .ProseMirror-selectednode.node-view-video,
+body.clipon-inline-edit-mode .ProseMirror .ProseMirror-selectednode.node-view-video {
+    border-color: #3b82f6;
+}
+
+.clipon-rich .video-resize-handle, body.clipon-inline-edit-mode .ProseMirror .video-resize-handle {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    width: 12px;
+    height: 12px;
+    background: #3b82f6;
+    border: 2px solid #fff;
+    border-radius: 2px;
+    cursor: nwse-resize;
+    opacity: 0;
+    z-index: 10;
+    transition: opacity 0.2s;
+}
+
+.clipon-rich .ProseMirror-selectednode.node-view-video .video-resize-handle,
+body.clipon-inline-edit-mode .ProseMirror .ProseMirror-selectednode.node-view-video .video-resize-handle {
+    opacity: 1;
+}
+
+body.clipon-inline-edit-mode.is-resizing-video {
+    cursor: nwse-resize !important;
+}
+
+body.clipon-inline-edit-mode.is-resizing-video *,
+body.clipon-inline-edit-mode.is-resizing-image * {
+    user-select: none !important;
+}
+
+body.clipon-inline-edit-mode.is-resizing-image {
+    cursor: nwse-resize !important;
+}
+
+/* General Spacing */
+.clipon-rich p, body.clipon-inline-edit-mode .ProseMirror p {
+    margin-bottom: 1.25rem;
+}
+
+.clipon-rich > *:last-child, body.clipon-inline-edit-mode .ProseMirror > *:last-child {
+    margin-bottom: 0;
+}
+
+.clipon-rich > *:first-child, body.clipon-inline-edit-mode .ProseMirror > *:first-child {
+    margin-top: 0;
+}
+
+.clipon-rich img, body.clipon-inline-edit-mode .ProseMirror img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5rem auto;
+    border-radius: 6px;
+}
+
+.clipon-rich a, body.clipon-inline-edit-mode .ProseMirror a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

@@ -1,0 +1,26 @@
+.DS_Store
+Thumbs.db
+
+# Local/runtime state
+/assets/uploads/
+/content/
+/config/
+/data/
+/logs/
+/modules/
+/templates/
+
+# Local dependencies and generated artifacts
+/vendor/
+/node_modules/
+/dist/
+*.zip
+*.log
+
+# Environment files and secrets
+.env
+*.pem
+*.key
+*.sqlite
+*.sqlite-*
+*.jsonl

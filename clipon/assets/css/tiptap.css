@@ -1,0 +1,532 @@
+/* Tiptap Editor Minimalist Styles (Notion-inspired) */
+@import url('tiptap-content.css');
+
+.tiptap-wrapper.mode-full {
+    position: relative;
+    margin: 0;
+    transition: all 0.2s ease;
+}
+
+.tiptap-wrapper.mode-base .ProseMirror {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    text-align: inherit;
+}
+
+.tiptap-wrapper.mode-base .ProseMirror p:only-child {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    text-align: inherit;
+}
+
+.tiptap-toolbar-minimal {
+    position: sticky;
+    top: 10px;
+    left: 0;
+    z-index: 1000;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+}
+
+.tiptap-bubble-menu {
+    display: flex;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-width: none;
+    width: max-content;
+    white-space: nowrap;
+    z-index: 11000;
+    visibility: visible !important;
+    pointer-events: auto;
+}
+
+/* Notion-like Floating Menu */
+.tiptap-floating-menu .tiptap-toolbar-group {
+    border-right: none;
+    padding: 0;
+}
+
+/* Hide static toolbar in full mode if typing (Notion style) 
+   But for now, let's keep it visible when focused. 
+*/
+
+.tiptap-floating-menu {
+    position: fixed;
+    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    z-index: 10001;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: none;
+    padding: 2px;
+    border-radius: 6px;
+    gap: 2px;
+}
+
+.tiptap-floating-menu.is-visible {
+    display: flex;
+}
+
+.tiptap-plus-trigger {
+    position: fixed;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: #ffffff;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.12s ease, background 0.12s ease;
+    z-index: 10001;
+}
+
+.tiptap-plus-trigger:hover {
+    background: #f1f5f9;
+}
+
+.tiptap-plus-trigger svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    stroke: currentColor;
+    stroke-width: 3;
+    stroke-linecap: round;
+    fill: none;
+} 
+.tiptap-plus-trigger {
+    pointer-events: none;
+}
+
+.tiptap-plus-trigger.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+.ProseMirror table {
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    table-layout: fixed;
+    width: 100%;
+    overflow: hidden;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    min-width: 1em;
+    padding: 6px 10px;
+    position: relative;
+    vertical-align: top;
+}
+
+.ProseMirror table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    text-align: left;
+}
+
+.ProseMirror table .selectedCell:after {
+    background: rgba(200, 200, 255, 0.4);
+    content: "";
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+}
+
+.ProseMirror table .column-resize-handle {
+    background-color: #adf;
+    bottom: -2px;
+    position: absolute;
+    right: -2px;
+    top: 0;
+    width: 4px;
+    z-index: 20;
+}
+
+.tiptap-toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    padding: 0 4px;
+    border-right: 1px solid #eeeeee;
+}
+
+.tiptap-toolbar-group:last-child {
+    border-right: none;
+}
+
+.tiptap-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #37352f;
+    transition: all 0.1s ease;
+}
+
+.tiptap-btn:hover {
+    background: #f1f1f1;
+}
+
+.tiptap-btn.is-active {
+    background: #ebf5fe;
+    color: #2383e2;
+}
+
+.tiptap-select {
+    padding: 2px 2px;
+    font-size: 13px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #37352f;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.1s ease;
+    margin: 0 2px;
+    width: 58px;
+    font-weight: 500;
+}
+
+.tiptap-select:hover {
+    background: #f1f1f1;
+}
+
+.tiptap-color-input {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.tiptap-color-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+/* Micro-animation for newly created block */
+.tiptap-new-block-anim {
+    animation: tiptapNewBlock 900ms cubic-bezier(.2,.9,.4,1) forwards;
+}
+@keyframes tiptapNewBlock {
+    0% { background: rgba(34, 100, 255, 0.16); transform: translateY(-4px); }
+    40% { background: rgba(34, 100, 255, 0.08); transform: translateY(0); }
+    100% { background: transparent; transform: translateY(0); }
+}
+
+/* Tooltip for plus feedback */
+.tiptap-plus-tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 160ms ease, transform 160ms ease;
+    pointer-events: none;
+    z-index: 10002;
+}
+.tiptap-plus-tooltip.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Small action animation for the plus button */
+.tiptap-plus-trigger.is-action { transform: scale(0.92); transition: transform 160ms ease; }
+
+/* Table cell contextual toolbar */
+.tiptap-table-cell-toolbar {
+    position: fixed;
+    display: flex;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #e6eefb;
+    box-shadow: 0 10px 25px -5px rgba(10,20,40,0.12);
+    padding: 6px;
+    border-radius: 8px;
+    z-index: 10000;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px) scale(0.96);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+.tiptap-table-cell-toolbar.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+.tiptap-table-cell-toolbar .tiptap-btn { 
+    padding: 4px; 
+    height: 28px; 
+    width: 28px; 
+    min-width: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tiptap-table-cell-toolbar .tiptap-btn svg {
+    width: 16px;
+    height: 16px;
+}
+.tiptap-table-cell-toolbar .tiptap-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.tiptap-table-cell-toolbar .tiptap-btn[title] { position: relative; }
+
+/* Small handle that appears on table cell hover and opens the cell toolbar */
+.tiptap-table-handle {
+    position: fixed;
+    display: flex;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #fff;
+    border: 1px solid rgba(15,23,42,0.1);
+    box-shadow: 0 4px 10px rgba(10,20,40,0.08);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10003;
+    font-size: 14px;
+    color: #475569;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.tiptap-table-handle svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+.tiptap-table-handle.is-visible { 
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+
+.tiptap-color-input::-webkit-color-swatch {
+    border: none;
+}
+
+.tiptap-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 1.5; /* Slightly thinner for more elegance */
+    fill: none;
+    display: block;
+}
+
+.tiptap-toolbar .tiptap-btn {
+    width: 32px;
+    height: 32px;
+}
+
+.tiptap-bubble-menu .tiptap-btn svg,
+.tiptap-floating-menu .tiptap-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.tiptap-bubble-menu .tiptap-toolbar-group,
+.tiptap-floating-menu .tiptap-toolbar-group {
+    border-right: none;
+    padding: 0 4px;
+}
+
+.tiptap-bubble-menu .tiptap-toolbar-group:not(:last-child) {
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Editor content area - inherits from parent */
+.ProseMirror {
+    outline: none;
+    min-height: 1em;
+    min-width: 1ch;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+/* 
+   Elegant fix: If there is only one paragraph, treat it as "invisible" container
+   to inherit line-height and styles from the target element properly.
+*/
+.tiptap-wrapper.mode-base .ProseMirror > p:only-child {
+    display: contents;
+}
+
+.tiptap-wrapper.is-empty .ProseMirror {
+    min-height: 1.2em;
+    min-width: 2ch;
+}
+
+.tiptap-wrapper.mode-base.is-empty .ProseMirror > p:only-child {
+    display: block;
+    min-height: 1.2em;
+    margin: 0;
+}
+
+.tiptap-wrapper.mode-full .ProseMirror {
+    min-height: 160px;
+}
+
+.tiptap-wrapper.mode-full .ProseMirror > p:only-child {
+    display: block;
+    min-height: 1.5em;
+}
+
+body.clipon-inline-edit-mode .tiptap-wrapper .ProseMirror > *:first-child {
+    margin-top: 0;
+}
+
+/* Specific editor states */
+.ProseMirror-focused {
+    outline: 2px solid rgba(35, 131, 226, 0.2);
+    border-radius: 4px;
+}
+
+.ProseMirror img.ProseMirror-selectednode {
+    outline: 3px solid #2383e2;
+}
+
+/* Color inputs */
+.tiptap-color-input {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    background: none;
+    cursor: pointer;
+}
+
+.tiptap-btn.btn-save {
+    background: #2383e2;
+    color: #ffffff;
+    width: auto;
+    padding: 0 12px;
+    height: 28px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 8px;
+    border-radius: 4px;
+}
+
+/* Hide toolbar when not focused or overlay active */
+.tiptap-wrapper:not(:focus-within) .tiptap-toolbar {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+}
+
+.tiptap-wrapper:focus-within .tiptap-toolbar {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Input Popup (Link, Video) */
+.tiptap-input-popup {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 10005;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 250px;
+}
+
+.tiptap-popup-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.tiptap-popup-input:focus {
+    border-color: #2383e2;
+    box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.2);
+}
+
+.tiptap-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.tiptap-popup-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #37352f;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.tiptap-popup-btn:hover {
+    background: #f1f5f9;
+}
+
+.tiptap-popup-btn.primary {
+    background: #2383e2;
+    color: #ffffff;
+    border-color: #2383e2;
+}
+
+.tiptap-popup-btn.primary:hover {
+    background: #1d6ec0;
+}

@@ -1,0 +1,479 @@
+:root {
+    --clipon-mp-primary: #4f46e5;
+    --clipon-mp-primary-hover: #4338ca;
+    --clipon-mp-primary-light: #eef2ff;
+    --clipon-mp-bg: #f8fafc;
+    --clipon-mp-surface: #ffffff;
+    --clipon-mp-surface-soft: #f8fafc;
+    --clipon-mp-border: #e2e8f0;
+    --clipon-mp-border-hover: #cbd5e1;
+    --clipon-mp-text: #0f172a;
+    --clipon-mp-muted: #64748b;
+    --clipon-mp-faint: #94a3b8;
+    --clipon-mp-success: #16a34a;
+    --clipon-mp-radius: 8px;
+    --clipon-mp-shadow: 0 10px 15px -3px rgb(15 23 42 / 0.1), 0 4px 6px -4px rgb(15 23 42 / 0.1);
+}
+
+.clipon-markup-highlight { outline: 2px dashed #2563eb !important; outline-offset: -2px !important; cursor: pointer !important; }
+.clipon-markup-selected { outline: 3px solid #16a34a !important; outline-offset: -2px !important; }
+.clipon-markup-blog-container { outline: 3px solid #7c3aed !important; outline-offset: -2px !important; }
+.clipon-markup-blog-card { outline: 3px solid #0891b2 !important; outline-offset: -2px !important; }
+.clipon-markup-blog-field { outline: 3px solid #f59e0b !important; outline-offset: -2px !important; }
+.clipon-markup-blog-pagination { outline: 3px solid #db2777 !important; outline-offset: -2px !important; }
+.clipon-markup-blog-field[data-clipon-blog-field],
+.clipon-markup-blog-field[data-clipon-blog-post-field] {
+    position: relative !important;
+    min-width: 44px !important;
+    min-height: 18px !important;
+}
+.clipon-markup-blog-field[data-clipon-blog-field]::after,
+.clipon-markup-blog-field[data-clipon-blog-post-field]::after {
+    content: attr(data-clipon-blog-field);
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    z-index: 100000 !important;
+    transform: translateY(-100%) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    background: #f59e0b !important;
+    color: #111827 !important;
+    font: 700 11px/1.25 Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    white-space: nowrap !important;
+    pointer-events: none !important;
+}
+.clipon-markup-blog-field[data-clipon-blog-post-field]::after {
+    content: attr(data-clipon-blog-post-field);
+}
+.clipon-markup-ancestor-candidate { outline: 3px solid #38bdf8 !important; outline-offset: -3px !important; }
+.clipon-shortcode-preview { display: contents !important; }
+
+#clipon-markup-picker-bar,
+#clipon-markup-picker-bar * {
+    box-sizing: border-box;
+}
+
+#clipon-markup-picker-bar {
+    font: 13px/1.4 Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--clipon-mp-text);
+}
+
+#clipon-markup-picker-bar [hidden] { display: none !important; }
+
+#clipon-markup-picker-bar .clipon-markup-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000000;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid var(--clipon-mp-border);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+    backdrop-filter: blur(12px);
+}
+
+#clipon-markup-picker-bar .clipon-markup-sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    z-index: 999999;
+    width: 320px;
+    overflow: auto;
+    padding: 14px;
+    background: var(--clipon-mp-surface);
+    border-right: 1px solid var(--clipon-mp-border);
+    box-shadow: 1px 0 2px rgb(15 23 42 / 0.03);
+    transition: transform 0.18s ease, visibility 0.18s ease;
+}
+
+#clipon-markup-picker-bar.is-sidebar-collapsed .clipon-markup-sidebar {
+    transform: translateX(-100%);
+    visibility: hidden;
+}
+
+#clipon-markup-picker-bar .clipon-markup-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+#clipon-markup-picker-bar .clipon-markup-brand-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+#clipon-markup-picker-bar .clipon-markup-sidebar-toggle {
+    width: 32px;
+    min-width: 32px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 1;
+}
+
+#clipon-markup-picker-bar .title {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--clipon-mp-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#clipon-markup-picker-status {
+    color: var(--clipon-mp-muted);
+    font-size: 12px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#clipon-markup-picker-bar .clipon-markup-scenarios,
+#clipon-markup-picker-bar .clipon-markup-actions,
+#clipon-markup-picker-bar .clipon-markup-list-actions,
+#clipon-markup-picker-bar .clipon-markup-segment {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+#clipon-markup-picker-bar .clipon-markup-scenarios {
+    justify-content: center;
+}
+
+#clipon-markup-picker-bar .clipon-markup-actions {
+    justify-content: flex-end;
+}
+
+#clipon-markup-picker-bar .clipon-markup-panel {
+    display: grid;
+    gap: 12px;
+}
+
+#clipon-markup-picker-bar .tool-label {
+    color: var(--clipon-mp-text);
+    font-weight: 800;
+    font-size: 13px;
+}
+
+#clipon-markup-picker-bar .tool-group {
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+    background: var(--clipon-mp-surface-soft);
+    border: 1px solid var(--clipon-mp-border);
+    border-radius: var(--clipon-mp-radius);
+    color: var(--clipon-mp-muted);
+}
+
+#clipon-markup-picker-bar .clipon-markup-section-title {
+    color: var(--clipon-mp-muted);
+    font-size: 12px;
+    font-weight: 750;
+}
+
+#clipon-markup-picker-bar .clipon-markup-check-grid,
+#clipon-markup-picker-bar .clipon-markup-tool-list {
+    display: grid;
+    gap: 6px;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-list {
+    grid-template-columns: 1fr;
+}
+
+#clipon-markup-picker-bar label {
+    display: grid;
+    gap: 5px;
+    color: var(--clipon-mp-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#clipon-markup-picker-bar .clipon-markup-label-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#clipon-markup-picker-bar .clipon-markup-help {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: var(--clipon-mp-surface-soft);
+    border: 1px solid var(--clipon-mp-border);
+    color: var(--clipon-mp-muted);
+    font-size: 11px;
+    line-height: 1;
+    cursor: help;
+}
+
+#clipon-markup-picker-bar .clipon-markup-help:hover,
+#clipon-markup-picker-bar .clipon-markup-help:focus {
+    color: var(--clipon-mp-primary);
+    border-color: #c7d2fe;
+    background: var(--clipon-mp-primary-light);
+    outline: none;
+}
+
+#clipon-markup-picker-bar [data-tooltip] {
+    position: relative;
+}
+
+.clipon-markup-floating-tooltip.admin-tooltip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000004;
+    max-width: 280px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: #111827;
+    color: #fff;
+    box-shadow: var(--clipon-mp-shadow);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.35;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.clipon-markup-floating-tooltip.admin-tooltip.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#clipon-markup-picker-bar .clipon-markup-check-grid label,
+#clipon-markup-picker-bar .tag-menu label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--clipon-mp-text);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#clipon-markup-picker-bar input[type="number"],
+#clipon-markup-picker-bar input[type="text"],
+#clipon-markup-picker-bar select {
+    width: 100%;
+    min-height: 34px;
+    padding: 7px 9px;
+    background: var(--clipon-mp-surface);
+    border: 1px solid var(--clipon-mp-border);
+    color: var(--clipon-mp-text);
+    border-radius: 6px;
+    font: inherit;
+}
+
+#clipon-markup-picker-bar input:focus,
+#clipon-markup-picker-bar select:focus {
+    outline: none;
+    border-color: var(--clipon-mp-primary);
+    box-shadow: 0 0 0 3px var(--clipon-mp-primary-light);
+}
+
+#clipon-markup-picker-bar .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 32px;
+    border: 1px solid var(--clipon-mp-border);
+    background: var(--clipon-mp-surface);
+    color: var(--clipon-mp-text);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 650;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#clipon-markup-picker-bar .btn:hover {
+    background: var(--clipon-mp-surface-soft);
+    border-color: var(--clipon-mp-border-hover);
+}
+
+#clipon-markup-picker-bar .btn.active {
+    background: var(--clipon-mp-primary-light);
+    border-color: #c7d2fe;
+    color: var(--clipon-mp-primary);
+}
+
+#clipon-markup-picker-bar .btn-success {
+    background: var(--clipon-mp-primary);
+    border-color: var(--clipon-mp-primary);
+    color: #fff;
+}
+
+#clipon-markup-picker-bar .btn-success:hover {
+    background: var(--clipon-mp-primary-hover);
+    border-color: var(--clipon-mp-primary-hover);
+}
+
+#clipon-markup-picker-bar .btn-cancel {
+    background: var(--clipon-mp-surface);
+    color: var(--clipon-mp-muted);
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-list .btn {
+    justify-content: flex-start;
+    width: 100%;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-row {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    min-height: 42px;
+    padding: 7px 9px;
+    text-align: left;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 1px solid var(--clipon-mp-border-hover);
+    background: var(--clipon-mp-surface);
+    justify-self: center;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-row.is-complete .clipon-markup-tool-status {
+    border-color: #86efac;
+    background: var(--clipon-mp-success);
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-main {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-name {
+    color: var(--clipon-mp-text);
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-target {
+    color: var(--clipon-mp-faint);
+    font-size: 11px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#clipon-markup-picker-bar .clipon-markup-tool-row.is-complete .clipon-markup-tool-target {
+    color: var(--clipon-mp-muted);
+}
+
+#clipon-markup-picker-bar details { position: relative; }
+#clipon-markup-picker-bar summary.btn { list-style: none; display: inline-flex; width: 100%; }
+#clipon-markup-picker-bar summary.btn::-webkit-details-marker { display: none; }
+
+#clipon-markup-picker-bar .tag-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1000001;
+    min-width: 240px;
+    max-height: 260px;
+    overflow: auto;
+    padding: 8px;
+    background: var(--clipon-mp-surface);
+    border: 1px solid var(--clipon-mp-border);
+    border-radius: 8px;
+    box-shadow: var(--clipon-mp-shadow);
+}
+
+#clipon-markup-picker-bar .tag-menu label {
+    padding: 5px 4px;
+}
+
+#clipon-markup-picker-bar .tag-empty {
+    color: var(--clipon-mp-faint);
+    padding: 5px 4px;
+}
+
+#clipon-markup-ancestor-picker {
+    position: fixed;
+    z-index: 1000002;
+    width: min(360px, calc(100vw - 24px));
+    background: var(--clipon-mp-surface);
+    color: var(--clipon-mp-text);
+    border: 1px solid var(--clipon-mp-border);
+    border-radius: 8px;
+    box-shadow: var(--clipon-mp-shadow);
+    padding: 8px;
+    font: 13px/1.4 Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#clipon-markup-ancestor-picker .ancestor-title {
+    color: var(--clipon-mp-muted);
+    font-weight: 800;
+    margin: 0 0 6px;
+}
+
+#clipon-markup-ancestor-picker .ancestor-list {
+    display: grid;
+    gap: 4px;
+    max-height: 260px;
+    overflow: auto;
+}
+
+#clipon-markup-ancestor-picker .ancestor-option {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--clipon-mp-text);
+    border-radius: 6px;
+    padding: 7px 8px;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#clipon-markup-ancestor-picker .ancestor-option:hover,
+#clipon-markup-ancestor-picker .ancestor-option.active {
+    background: var(--clipon-mp-primary-light);
+    border-color: #c7d2fe;
+    color: var(--clipon-mp-primary);
+}
+
+@media (max-width: 900px) {
+    #clipon-markup-picker-bar .clipon-markup-topbar {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    #clipon-markup-picker-bar .clipon-markup-sidebar {
+        width: 280px;
+    }
+}
