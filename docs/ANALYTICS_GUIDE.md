@@ -14,7 +14,7 @@ Clipon CMS analytics consists of core data collection and a PRO tier for advance
 | Funnel CRUD (step configuration) | No | Yes |
 | Page-based conversions | Yes | Yes |
 | Custom conversion types | Yes | Yes |
-| Custom conversion events | No | Yes |
+| Direct JavaScript conversion tracking | No | Yes |
 | Filtering of bots, probe requests, and technical traffic | Yes | Yes |
 
 The funnel and attribution toggles in **Settings > Analytics** (`enable_funnels`, `enable_attribution`) are enabled by default as a locked PRO preview. Core daily analytics files are still kept locally, but funnel/attribution logic and real advanced reports are activated only when the `pro_analytics` module is available.
@@ -179,20 +179,19 @@ For data to appear in the attribution report, you need to:
 2. In the **Conversions** section, make sure the required conversion types are enabled. You can also create a custom type with a stable key and display label.
 3. For pages and posts that should count as conversions, enable the corresponding conversion type in the page/post settings. The CMS stores the conversion URL map in `config/conversions.php`.
 
-### Custom conversion events (PRO)
+### Direct conversion tracking (PRO)
 
-The `pro_analytics` module can count a JavaScript action as a conversion without redirecting the visitor to a dedicated conversion page. Typical examples are a successful AJAX form submission, a completed checkout widget, or a click that opens an external booking flow.
+The `pro_analytics` module can count a JavaScript action as a conversion without redirecting the visitor to a dedicated conversion page. Typical examples are a successful AJAX form submission, a completed checkout widget, or a phone-number click.
 
 1. Go to **Settings > Analytics**.
-2. Open the custom conversion events manager.
-3. Create an event with a name, a stable key, and a conversion type. Only enabled conversion types can be assigned.
-4. Keep the event enabled and save the Analytics settings.
-5. Call the injected public helper after the action succeeds:
+2. Create or enable the required conversion type and note its stable key.
+3. Save the Analytics settings.
+4. Call the injected public helper with that type key after the action succeeds:
 
 ```html
 <script>
 document.querySelector('#lead-form').addEventListener('submit-success', function () {
-    window.cliponAnalytics?.trackConversion('lead_form_submitted');
+    window.cliponAnalytics?.trackConversion('lead');
 });
 </script>
 ```
@@ -200,14 +199,14 @@ document.querySelector('#lead-form').addEventListener('submit-success', function
 The optional second argument records the page/path associated with the conversion. If omitted, the current pathname is used:
 
 ```js
-window.cliponAnalytics?.trackConversion('booking_completed', '/booking/complete');
+window.cliponAnalytics?.trackConversion('purchase', '/booking/complete');
 ```
 
-Event and type keys may contain lowercase Latin letters, digits, underscores, and hyphens, and are limited to 48 characters. The CMS supports up to 50 custom event rules and 40 custom conversion types. Duplicate event keys are ignored during validation.
+Type keys may contain lowercase Latin letters, digits, underscores, and hyphens, and are limited to 48 characters. The CMS supports up to 40 custom conversion types.
 
-The helper sends `category: "conversion"` to the standard public analytics endpoint with the page's analytics token. The server accepts the event only when the PRO Analytics service is available and the matching configured rule is enabled; arbitrary client-supplied event keys are rejected. Privacy/basic collection deduplicates by page-view identifier, while full analytics applies a five-minute session deduplication window for the same event and path.
+The helper sends `category: "conversion"` to the standard public analytics endpoint with the page's analytics token. The server accepts the conversion only when the PRO Analytics service is available and the supplied conversion type exists and is enabled; arbitrary keys are rejected. Privacy/basic collection deduplicates by page-view identifier, while full analytics applies a five-minute session deduplication window for the same type and path.
 
-Custom events contribute to total conversions, conversions by page and type, recent conversions, and PRO attribution data. Page-based conversions through `config/conversions.php` continue to work independently.
+Direct conversions contribute to total conversions, conversions by page and type, recent conversions, and PRO reports. Page-based conversions through `config/conversions.php` continue to work independently.
 
 ---
 

@@ -292,9 +292,7 @@ class Settings {
             array_key_exists('conversion_types', $data) ? $data['conversion_types'] : self::getDefaultConversionTypes()
         );
 
-        if (!isset($data['custom_conversion_events']) || !is_array($data['custom_conversion_events'])) {
-            $data['custom_conversion_events'] = [];
-        }
+        unset($data['custom_conversion_events']);
 
         if (!isset($data['powered_by_theme']) || !in_array($data['powered_by_theme'], ['light', 'dark'], true)) {
             $data['powered_by_theme'] = 'light';

@@ -262,6 +262,9 @@
                         return !empty($item['label']) ? (string)$item['label'] : ($labels[$key] ?? ucfirst(str_replace('_', ' ', $key)));
                     }, $conversionTypes), 0, 4)), ENT_QUOTES, 'UTF-8') ?><?= count($conversionTypes) > 4 ? '…' : '' ?></span>
                 </div>
+                <?php if ($proAnalyticsAvailable): ?>
+                    <div class="settings-conversion-api-hint"><span><?= __('settings_conversion_types_api_hint') ?></span><code>window.cliponAnalytics.trackConversion('type_key')</code></div>
+                <?php endif; ?>
             </section>
 
             <div id="conversionTypesManagerModal" class="modal cms-modal analytics-manager-modal" role="dialog" aria-modal="true" aria-labelledby="conversionTypesManagerTitle">
@@ -300,7 +303,7 @@
                                 <?php else: ?>
                                     <strong><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></strong>
                                 <?php endif; ?>
-                                <div><code><?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?></code><span class="analytics-manager-badge"><?= $custom ? __('settings_conversion_types_custom') : __('settings_conversion_types_system') ?></span></div>
+                                <code><?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?></code>
                             </div>
                             <label class="settings-inline-checkbox analytics-manager-toggle">
                                 <input type="checkbox" name="conversion_type_items[<?= $index ?>][enabled]" value="1" <?= $enabled ? 'checked' : '' ?>>
@@ -345,67 +348,6 @@
                 </div>
             </div>
 
-            <section class="settings-section">
-                <div class="settings-section-header">
-                    <div>
-                        <h3><?= __('settings_custom_conversion_events_title') ?></h3>
-                        <p><?= __('settings_custom_conversion_events_hint') ?></p>
-                    </div>
-                    <?php if ($proAnalyticsAvailable): ?>
-                        <button type="button" class="btn btn-secondary" data-open-conversion-events><?= __('settings_custom_conversion_events_manage') ?></button>
-                    <?php endif; ?>
-                </div>
-
-                <?php if (!$proAnalyticsAvailable): ?>
-                    <p class="text-muted"><?= __('settings_custom_conversion_events_pro') ?></p>
-                <?php else: ?>
-                    <div class="settings-conversion-types-summary">
-                        <strong><?= sprintf(__('settings_custom_conversion_events_count'), count($customConversionEvents)) ?></strong>
-                        <code>window.cliponAnalytics.trackConversion('event_key')</code>
-                    </div>
-                <?php endif; ?>
-            </section>
-
-            <?php if ($proAnalyticsAvailable): ?>
-            <div id="customConversionEventsManagerModal" class="modal cms-modal analytics-manager-modal" role="dialog" aria-modal="true" aria-labelledby="customConversionEventsManagerTitle">
-                <div class="modal-content cms-modal-content analytics-manager-shell analytics-events-shell">
-                    <div class="modal-header cms-modal-header analytics-manager-header">
-                        <div><h3 id="customConversionEventsManagerTitle"><?= __('settings_custom_conversion_events_manage_title') ?></h3><p><?= __('settings_custom_conversion_events_manage_desc') ?></p></div>
-                        <button type="button" class="close-modal cms-modal-close" data-close-conversion-events aria-label="<?= __('cancel') ?>">&times;</button>
-                    </div>
-                    <div class="modal-body cms-modal-body">
-                        <div class="analytics-manager-toolbar">
-                            <label class="analytics-manager-search"><span class="sr-only"><?= __('search') ?></span><input type="search" class="form-control" placeholder="<?= __('settings_custom_conversion_events_search') ?>" data-filter-conversion-events></label>
-                            <span class="analytics-manager-count" data-conversion-events-count><?= sprintf(__('settings_custom_conversion_events_count'), count($customConversionEvents)) ?></span>
-                            <button type="button" class="btn btn-primary" data-add-conversion-event><?= __('settings_custom_conversion_events_add') ?></button>
-                        </div>
-                        <div class="settings-custom-events" data-conversion-events>
-                        <?php foreach ($customConversionEvents as $index => $event): ?>
-                            <div class="settings-custom-event-row analytics-manager-item" data-conversion-event-row>
-                                <input type="text" name="custom_conversion_events[<?= $index ?>][name]" value="<?= htmlspecialchars((string)($event['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= __('settings_custom_conversion_events_name') ?>" maxlength="80" required>
-                                <input type="text" name="custom_conversion_events[<?= $index ?>][key]" value="<?= htmlspecialchars((string)($event['key'] ?? ''), ENT_QUOTES, 'UTF-8') ?>" placeholder="<?= __('settings_custom_conversion_events_key') ?>" maxlength="48" pattern="[a-z0-9_-]+" required>
-                                <select name="custom_conversion_events[<?= $index ?>][type]">
-                                    <?php foreach ($conversionTypes as $conversionType): $typeKey = (string)($conversionType['key'] ?? ''); if ($typeKey === '') continue; ?>
-                                        <option value="<?= htmlspecialchars($typeKey, ENT_QUOTES, 'UTF-8') ?>" <?= ($event['type'] ?? '') === $typeKey ? 'selected' : '' ?>><?= htmlspecialchars(!empty($conversionType['label']) ? (string)$conversionType['label'] : ($labels[$typeKey] ?? ucfirst(str_replace('_', ' ', $typeKey))), ENT_QUOTES, 'UTF-8') ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <label class="settings-inline-checkbox"><input type="checkbox" name="custom_conversion_events[<?= $index ?>][enabled]" value="1" <?= !empty($event['enabled']) ? 'checked' : '' ?>> <span><?= __('enabled') ?></span></label>
-                                <button type="button" class="analytics-manager-delete" data-remove-conversion-event aria-label="<?= __('delete') ?>">&times;</button>
-                            </div>
-                        <?php endforeach; ?>
-                        </div>
-                        <div class="analytics-manager-empty" data-conversion-events-empty <?= empty($customConversionEvents) ? '' : 'hidden' ?>>
-                            <strong><?= __('settings_custom_conversion_events_empty_title') ?></strong>
-                            <span><?= __('settings_custom_conversion_events_empty_desc') ?></span>
-                        </div>
-                        <div class="analytics-manager-code"><span><?= __('settings_custom_conversion_events_usage') ?></span><code>window.cliponAnalytics.trackConversion('event_key')</code></div>
-                    </div>
-                    <div class="modal-footer cms-modal-footer">
-                        <button type="button" class="btn btn-primary" data-close-conversion-events><?= __('done') ?></button>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
         </div>
 
         <div class="form-actions settings-actions-spaced">
@@ -587,16 +529,11 @@ document.addEventListener('DOMContentLoaded', function () {
             row.className = 'settings-conversion-type-row analytics-manager-item';
             row.dataset.conversionTypeRow = '';
             row.dataset.searchValue = `${label} ${key}`.toLowerCase();
-            row.innerHTML = `<input type="hidden" name="conversion_type_items[${index}][key]" value="${key}"><div class="analytics-manager-identity"><input type="text" name="conversion_type_items[${index}][label]" maxlength="80" required><div><code></code><span class="analytics-manager-badge"><?= __('settings_conversion_types_custom') ?></span></div></div><label class="settings-inline-checkbox analytics-manager-toggle"><input type="checkbox" name="conversion_type_items[${index}][enabled]" value="1" checked><span><?= __('enabled') ?></span></label><button type="button" class="analytics-manager-delete" data-remove-conversion-type aria-label="<?= __('delete') ?>">&times;</button>`;
+            row.innerHTML = `<input type="hidden" name="conversion_type_items[${index}][key]" value="${key}"><div class="analytics-manager-identity"><input type="text" name="conversion_type_items[${index}][label]" maxlength="80" required><code></code></div><label class="settings-inline-checkbox analytics-manager-toggle"><input type="checkbox" name="conversion_type_items[${index}][enabled]" value="1" checked><span><?= __('enabled') ?></span></label><button type="button" class="analytics-manager-delete" data-remove-conversion-type aria-label="<?= __('delete') ?>">&times;</button>`;
             row.querySelector('input[type="text"]').value = label.trim();
             row.querySelector('code').textContent = key;
             conversionTypes.appendChild(row);
             refreshTypeCount();
-            form.querySelectorAll('select[name*="custom_conversion_events"][name$="[type]"]').forEach(select => {
-                if ([...select.options].some(option => option.value === key)) return;
-                select.add(new Option(label.trim(), key));
-            });
-            if (Array.isArray(window.cliponConversionTypeOptions)) window.cliponConversionTypeOptions.push({ key, label: label.trim() });
             closeTypeModal();
         };
         const closeManager = () => {
@@ -644,82 +581,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             const row = button.closest('[data-conversion-type-row]');
-            const removedKey = row.querySelector('input[type="hidden"]').value;
             row.remove();
             reindexTypes();
             refreshTypeCount();
             managerError.hidden = true;
-            form.querySelectorAll('select[name*="custom_conversion_events"][name$="[type]"]').forEach(select => {
-                const option = [...select.options].find(item => item.value === removedKey);
-                if (option) option.remove();
-            });
-            if (Array.isArray(window.cliponConversionTypeOptions)) {
-                window.cliponConversionTypeOptions = window.cliponConversionTypeOptions.filter(item => item.key !== removedKey);
-            }
-        });
-    }
-
-    const eventsContainer = form.querySelector('[data-conversion-events]');
-    const addEvent = form.querySelector('[data-add-conversion-event]');
-    const eventsManager = document.getElementById('customConversionEventsManagerModal');
-    const openEventsManager = form.querySelector('[data-open-conversion-events]');
-    if (eventsContainer && addEvent && eventsManager && openEventsManager) {
-        const eventsCount = eventsManager.querySelector('[data-conversion-events-count]');
-        const eventsFilter = eventsManager.querySelector('[data-filter-conversion-events]');
-        const eventsEmpty = eventsManager.querySelector('[data-conversion-events-empty]');
-        const refreshEvents = () => {
-            const rows = eventsContainer.querySelectorAll('[data-conversion-event-row]');
-            eventsCount.textContent = <?= json_encode(__('settings_custom_conversion_events_count'), JSON_UNESCAPED_UNICODE) ?>.replace('%d', rows.length);
-            eventsEmpty.hidden = rows.length !== 0;
-            rows.forEach(row => {
-                const values = [...row.querySelectorAll('input, select')].map(input => input.value).join(' ').toLowerCase();
-                row.dataset.searchValue = values;
-            });
-        };
-        const closeEventsManager = () => {
-            eventsManager.classList.remove('active', 'is-open');
-            document.body.classList.remove('modal-open');
-        };
-        openEventsManager.addEventListener('click', function () {
-            refreshEvents();
-            eventsFilter.value = '';
-            eventsContainer.querySelectorAll('[data-conversion-event-row]').forEach(row => row.hidden = false);
-            eventsManager.classList.add('active', 'is-open');
-            document.body.classList.add('modal-open');
-        });
-        eventsManager.querySelectorAll('[data-close-conversion-events]').forEach(button => button.addEventListener('click', closeEventsManager));
-        eventsManager.addEventListener('click', event => { if (event.target === eventsManager) closeEventsManager(); });
-        eventsFilter.addEventListener('input', function () {
-            refreshEvents();
-            const query = eventsFilter.value.trim().toLowerCase();
-            eventsContainer.querySelectorAll('[data-conversion-event-row]').forEach(row => {
-                row.hidden = query !== '' && !(row.dataset.searchValue || '').includes(query);
-            });
-        });
-        window.cliponConversionTypeOptions = <?= json_encode(array_values(array_filter(array_map(function ($item) use ($labels) {
-            $key = (string)($item['key'] ?? '');
-            return $key === '' ? null : ['key' => $key, 'label' => !empty($item['label']) ? (string)$item['label'] : ($labels[$key] ?? ucfirst(str_replace('_', ' ', $key)))];
-        }, $conversionTypes))), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-        const reindexEvents = () => eventsContainer.querySelectorAll('[data-conversion-event-row]').forEach((row, index) => {
-            row.querySelectorAll('[name]').forEach(input => input.name = input.name.replace(/custom_conversion_events\[\d+\]/, `custom_conversion_events[${index}]`));
-        });
-        addEvent.addEventListener('click', function () {
-            const index = eventsContainer.querySelectorAll('[data-conversion-event-row]').length;
-            const row = document.createElement('div');
-            row.className = 'settings-custom-event-row analytics-manager-item';
-            row.dataset.conversionEventRow = '';
-            row.innerHTML = `<input type="text" name="custom_conversion_events[${index}][name]" placeholder="<?= __('settings_custom_conversion_events_name') ?>" maxlength="80" required><input type="text" name="custom_conversion_events[${index}][key]" placeholder="<?= __('settings_custom_conversion_events_key') ?>" maxlength="48" pattern="[a-z0-9_-]+" required><select name="custom_conversion_events[${index}][type]"></select><label class="settings-inline-checkbox analytics-manager-toggle"><input type="checkbox" name="custom_conversion_events[${index}][enabled]" value="1" checked> <span><?= __('enabled') ?></span></label><button type="button" class="analytics-manager-delete" data-remove-conversion-event aria-label="<?= __('delete') ?>">&times;</button>`;
-            const select = row.querySelector('select');
-            window.cliponConversionTypeOptions.forEach(item => select.add(new Option(item.label, item.key)));
-            eventsContainer.appendChild(row);
-            refreshEvents();
-        });
-        eventsContainer.addEventListener('click', function (event) {
-            const button = event.target.closest('[data-remove-conversion-event]');
-            if (!button) return;
-            button.closest('[data-conversion-event-row]').remove();
-            reindexEvents();
-            refreshEvents();
         });
     }
 

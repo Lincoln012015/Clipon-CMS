@@ -36,9 +36,9 @@ class PublicPageInstrumentation {
                 }).catch(function(){});
             }
             window.cliponAnalytics = window.cliponAnalytics || {};
-            window.cliponAnalytics.trackConversion = function(eventKey, label) {
-                if (typeof eventKey !== "string" || !eventKey.trim()) return;
-                send({ category: "conversion", action: eventKey.trim(), label: label || window.location.pathname }, false);
+            window.cliponAnalytics.trackConversion = function(typeKey, label) {
+                if (typeof typeKey !== "string" || !typeKey.trim()) return;
+                send({ category: "conversion", action: typeKey.trim(), label: label || window.location.pathname }, false);
             };
             window.addEventListener("scroll", function() {
                 let h = document.documentElement, b = document.body, st = "scrollTop", sh = "scrollHeight";
@@ -85,9 +85,9 @@ class PublicPageInstrumentation {
                 }).catch(function(){});
             }
             window.cliponAnalytics = window.cliponAnalytics || {};
-            window.cliponAnalytics.trackConversion = function(eventKey, label) {
-                if (typeof eventKey !== "string" || !eventKey.trim()) return;
-                send({ category: "conversion", action: eventKey.trim(), label: label || window.location.pathname }, false);
+            window.cliponAnalytics.trackConversion = function(typeKey, label) {
+                if (typeof typeKey !== "string" || !typeKey.trim()) return;
+                send({ category: "conversion", action: typeKey.trim(), label: label || window.location.pathname }, false);
             };
             window.addEventListener("scroll", function() {
                 let h = document.documentElement, b = document.body, st = "scrollTop", sh = "scrollHeight";

@@ -2,6 +2,13 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.9.2
+- remove the custom conversion events layer
+- track enabled conversion types directly from JavaScript
+- add configurable conversion types
+- redesign the conversion type manager
+- update analytics documentation
+
 ## 0.9.1
 
 - Canonicalized active public page and blog routes without a trailing slash.
@@ -11,7 +18,7 @@ All notable release-facing changes should be documented here.
 ## 0.9.0
 
 - Added configurable custom conversion types to Core analytics.
-- Added PRO custom conversion events with browser-side tracking, server-side rule validation, privacy-mode-aware deduplication, and attribution data.
+- Added direct PRO conversion tracking by enabled conversion-type key, with server-side validation and privacy-mode-aware deduplication.
 
 ## 0.8.1
 

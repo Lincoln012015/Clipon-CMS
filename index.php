@@ -132,7 +132,7 @@ if (preg_match('#^/clipon/#', $requestPath)) {
 }
 
 // Allow static files to be served directly
-if (preg_match('#\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp)$#i', $requestPath)) {
+if (preg_match('#\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp|zip)$#i', $requestPath)) {
     return false;
 }
 

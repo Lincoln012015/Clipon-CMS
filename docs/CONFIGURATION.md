@@ -6,7 +6,7 @@ Clipon CMS stores site-owned configuration outside the system directory.
 
 In a release install:
 
-- `config/settings.php` - site settings, languages, analytics mode, cookie banner, pagination, the conversion-type catalog, and PRO custom conversion event rules.
+- `config/settings.php` - site settings, languages, analytics mode, cookie banner, pagination, and the conversion-type catalog.
 - `config/route_map.php` - route map and redirects.
 - `config/directories.php` - page directory tree.
 - `config/blog_directories.php` - blog directory tree.
@@ -26,7 +26,7 @@ Settings are managed through `/clipon/admin/settings.php`. Important fields:
 - language list and primary language;
 - analytics retention;
 - cookie banner and analytics mode;
-- conversion types and, when PRO Analytics is active, custom conversion events;
+- conversion types;
 - blog pagination styles and labels;
 - powered-by visibility/theme;
 - license key and update state.
@@ -64,9 +64,9 @@ Manage these values through Settings and page configuration. Do not maintain the
 
 Custom conversion types are stored alongside the built-in type catalog in `conversion_types`. A custom item has a stable `key`, a display `label`, an `enabled` flag, and `custom: true`. Keys are normalized to lowercase letters, digits, underscores, and hyphens. Up to 40 custom types may be stored.
 
-When the `pro_analytics` module is available, `custom_conversion_events` stores up to 50 event rules. Each rule contains a stable `key`, an administrator-facing `name`, an assigned conversion `type`, and an `enabled` flag. If its assigned type is later disabled or removed, saving Analytics settings reassigns the rule to the first enabled conversion type. Manage both catalogs through **Settings > Analytics** rather than editing `config/settings.php` directly.
+When the `pro_analytics` module is available, frontend code can record any enabled conversion type directly with `window.cliponAnalytics.trackConversion('type_key')`. Type keys are managed through **Settings > Analytics** and remain stable even when their administrator-facing labels change. Unknown or disabled keys are rejected by the tracking endpoint.
 
-For the browser-side tracking call and deduplication behavior, see [ANALYTICS_GUIDE.md](ANALYTICS_GUIDE.md#custom-conversion-events-pro).
+For the browser-side tracking call and deduplication behavior, see [ANALYTICS_GUIDE.md](ANALYTICS_GUIDE.md#direct-conversion-tracking-pro).
 
 ## Modules
 

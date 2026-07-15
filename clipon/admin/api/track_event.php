@@ -94,13 +94,17 @@ if (!is_string($category) || !is_string($action) || ($label !== null && !is_stri
 $category = trim($category);
 $action = trim($action);
 
-$customRule = null;
-if ($category === 'conversion' && function_exists('registry') && registry()->has('pro_analytics.service') && method_exists(registry()->get('pro_analytics.service'), 'getCustomConversionEvent')) {
-    $analyticsSettings = Settings::load();
-    $customRule = registry()->get('pro_analytics.service')->getCustomConversionEvent(
-        $action,
-        is_array($analyticsSettings['custom_conversion_events'] ?? null) ? $analyticsSettings['custom_conversion_events'] : []
-    );
+$conversionType = null;
+if ($category === 'conversion' && function_exists('registry') && registry()->has('pro_analytics.service')) {
+    $proAnalyticsService = registry()->get('pro_analytics.service');
+    if (method_exists($proAnalyticsService, 'trackConversion') && $proAnalyticsService->isAvailable()) {
+        foreach (Settings::getConversionTypes() as $type) {
+            if (!empty($type['enabled']) && (string)($type['key'] ?? '') === $action) {
+                $conversionType = $action;
+                break;
+            }
+        }
+    }
 }
 
 $allowed = [
@@ -108,7 +112,7 @@ $allowed = [
     'system' => ['timer_pulse']
 ];
 
-if ($customRule === null && (!isset($allowed[$category]) || !in_array($action, $allowed[$category], true))) {
+if ($conversionType === null && (!isset($allowed[$category]) || !in_array($action, $allowed[$category], true))) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Unsupported event']);
     exit;
@@ -138,8 +142,8 @@ if ($category !== '' && $action !== '') {
             exit;
         }
 
-        if ($customRule !== null) {
-            registry()->get('pro_analytics.service')->trackCustomConversion($customRule, (string)($label ?: '/'), true, $pageviewId);
+        if ($conversionType !== null) {
+            $proAnalyticsService->trackConversion($conversionType, (string)($label ?: '/'), true, $pageviewId);
         } else {
             Analytics::trackBasicEvent($category, $action, $label);
         }
@@ -179,8 +183,8 @@ if ($category !== '' && $action !== '') {
         exit;
     }
 
-    if ($customRule !== null) {
-        registry()->get('pro_analytics.service')->trackCustomConversion($customRule, (string)($label ?: '/'));
+    if ($conversionType !== null) {
+        $proAnalyticsService->trackConversion($conversionType, (string)($label ?: '/'));
     } else {
         Analytics::trackEvent($category, $action, $label);
     }
