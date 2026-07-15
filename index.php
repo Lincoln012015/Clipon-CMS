@@ -22,6 +22,7 @@ if (!$needsSessionAwareBootstrap && !defined('CLIPON_SESSIONLESS_BOOTSTRAP')) {
 
 require_once __DIR__ . '/clipon/bootstrap.php';
 require_once __DIR__ . '/clipon/lib/Analytics.php';
+require_once __DIR__ . '/clipon/lib/CanonicalUrl.php';
 
 function clipon_start_session_if_needed(): void {
     if (session_status() === PHP_SESSION_ACTIVE || !class_exists('SessionManager')) {
@@ -238,6 +239,19 @@ if ($route) {
 
 if ($route && isset($route['active']) && $route['active'] === false) {
     $route = null;
+}
+
+if ($route) {
+    $canonicalTarget = clipon_trailing_slash_redirect_target(
+        $requestPath,
+        CMS_BASE_PATH,
+        (string)$request->server('QUERY_STRING', ''),
+        (string)$request->server('REQUEST_METHOD', 'GET')
+    );
+    if ($canonicalTarget !== null) {
+        header('Location: ' . $canonicalTarget, true, 301);
+        exit;
+    }
 }
 
 if (!$route) {

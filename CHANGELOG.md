@@ -2,6 +2,12 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.9.1
+
+- Canonicalized active public page and blog routes without a trailing slash.
+- Added application-level `301` redirects from trailing-slash URL variants while preserving query strings and subdirectory installation paths.
+- Added regression coverage for root, nested, localized, encoded, and subdirectory URLs, including safe request-method handling.
+
 ## 0.9.0
 
 - Added configurable custom conversion types to Core analytics.

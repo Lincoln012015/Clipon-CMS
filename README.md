@@ -48,7 +48,7 @@ Structured runtime data is stored as guarded flat files, commonly JSON payloads 
 
 Inline editing uses the editor bundle included with the CMS. Elements marked with `class="clipon"` are identified by `data-key`, `id`, or an automatic `clipon_<index>` fallback, and stored content is sanitized before rendering.
 
-The front controller and route map provide clean URLs, page/blog routes, redirects, active/inactive state, and sitemap generation. Localized slugs and multilingual alternate URLs are available only when the optional Multilang module is active.
+The front controller and route map provide clean URLs, page/blog routes, redirects, active/inactive state, and sitemap generation. Active public routes use URLs without a trailing slash: `GET` and `HEAD` requests for a trailing-slash variant receive a permanent `301` redirect to the canonical URL, with the query string and installation base path preserved. The home page `/` is unchanged. Localized slugs and multilingual alternate URLs are available only when the optional Multilang module is active.
 
 ## Admin, Analytics, And Modules
 

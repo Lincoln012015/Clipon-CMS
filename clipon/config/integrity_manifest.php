@@ -15,7 +15,7 @@ return array (
   ),
   'optional' => 
   array (
-    'index.php' => 'fb51afd9adbb837a67b0057f4d4ec2630a86b09ab35a0f6b5633a64bc0768871',
+    'index.php' => '3658b465b74ff4bcf1fb15f871b8cdb0f80fa82e8ecf21f6761320e838ed0158',
     'clipon/admin/pro/smart_stub.php' => 'db787891f1cdb5ce0ec69f08a082349959f1f44a1b9c7dc0129e205393a18d96',
   ),
 );
