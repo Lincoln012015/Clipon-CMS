@@ -11,6 +11,7 @@ Depending on enabled features, Clipon CMS can store:
 - media filenames and alt metadata;
 - route maps and redirects;
 - analytics counters and event data;
+- configured custom conversion events and, when triggered, their event key, conversion type, normalized page path, timestamp, UTM values, and referrer host;
 - cookie consent state in browser cookies;
 - license/update state;
 - logs for auth, CSRF, update, migration, and application behavior.
@@ -29,6 +30,8 @@ Depending on enabled features, Clipon CMS can store:
 - active only after cookie banner acceptance;
 - sets first-party visitor/consent cookies;
 - enables session-level metrics such as exit pages, bounce rate, and conversion dedupe.
+
+When PRO custom conversion events are configured, they use the active analytics privacy mode. Privacy/basic mode does not create an analytics visitor cookie and deduplicates an event using the page-view identifier. Full-with-consent mode can use session state and suppresses repeated instances of the same event and path within a five-minute window. Custom event records do not store the raw referrer URL; only its normalized host is retained.
 
 ## Cookies
 

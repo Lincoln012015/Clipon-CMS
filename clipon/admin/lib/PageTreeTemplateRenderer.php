@@ -226,6 +226,12 @@ if (!function_exists('renderPageTemplate')) {
                 'sign_up' => __('conversion_type_sign_up'),
                 'other' => __('conversion_type_other'),
             ];
+            foreach ($conversionTypes as $conversionTypeItem) {
+                $itemKey = (string)($conversionTypeItem['key'] ?? '');
+                if ($itemKey !== '' && !empty($conversionTypeItem['label'])) {
+                    $labels[$itemKey] = (string)$conversionTypeItem['label'];
+                }
+            }
             if ($conversionType && !in_array($conversionType, $enabledConvTypes, true)) {
                 $enabledConvTypes[] = $conversionType;
             }

@@ -43,6 +43,12 @@ Media uploads are restricted by filename, extension, MIME checks, and path conta
 
 Runtime data uses guarded files and must not be directly web-readable. The shipped Apache rules and documented Nginx baseline deny `config/`, `content/`, `data/`, `logs/`, `modules/`, `templates/`, backup/temp directories, and common runtime-file extensions. Keeping private runtime state outside the document root is preferred where supported.
 
+## Integration API
+
+Optional integration modules receive publishing webhooks through the Core endpoint at `/clipon/api/integrations.php`. Module directories remain private and must never be exposed as HTTP routes. The endpoint is sessionless, accepts JSON `POST` and `DELETE` requests, limits bodies to 5 MB, applies a per-provider/IP rate limit, and delegates authentication to the selected provider. Production integrations must use HTTPS.
+
+Provider modules should store only token hashes, compare them in constant time, omit tokens and article bodies from logs, and rotate tokens from an authenticated, CSRF-protected administrator screen. Remote media importers must reject private/reserved network destinations and validate the downloaded file type.
+
 ## Analytics Privacy
 
 Privacy/basic analytics avoids visitor cookies for anonymous public requests. Full analytics requires cookie banner acceptance and can use visitor/session state.

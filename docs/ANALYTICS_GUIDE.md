@@ -12,6 +12,9 @@ Clipon CMS analytics consists of core data collection and a PRO tier for advance
 | Funnels (metrics) | Demo data / locked UI | Real data |
 | Attribution (metrics) | Demo data / locked UI | Real data |
 | Funnel CRUD (step configuration) | No | Yes |
+| Page-based conversions | Yes | Yes |
+| Custom conversion types | Yes | Yes |
+| Custom conversion events | No | Yes |
 | Filtering of bots, probe requests, and technical traffic | Yes | Yes |
 
 The funnel and attribution toggles in **Settings > Analytics** (`enable_funnels`, `enable_attribution`) are enabled by default as a locked PRO preview. Core daily analytics files are still kept locally, but funnel/attribution logic and real advanced reports are activated only when the `pro_analytics` module is available.
@@ -170,12 +173,41 @@ The system tracks the `utm_source`, `utm_medium`, and `utm_campaign` parameters,
 1. **First Touch**: all "credit" for the conversion goes to the very first source through which the user first reached the site. Useful for evaluating reach and engagement.
 2. **Last Touch**: all credit goes to the last source before the conversion. Useful for evaluating direct impact on sales.
 
-### Conversion setup:
+### Page-based conversion setup:
 For data to appear in the attribution report, you need to:
 1. Go to **Settings**.
-2. In the "Conversions" section, make sure the required event types are enabled.
+2. In the **Conversions** section, make sure the required conversion types are enabled. You can also create a custom type with a stable key and display label.
 3. For pages and posts that should count as conversions, enable the corresponding conversion type in the page/post settings. The CMS stores the conversion URL map in `config/conversions.php`.
-4. The public tracking endpoint is not a custom conversion or business-events API. It accepts only scroll milestones (`25%`, `50%`, `75%`, `100%`) and the internal `system: timer_pulse` event, subject to privacy and rate-limit checks. Conversion attribution is derived from the configured page/post conversion URL map.
+
+### Custom conversion events (PRO)
+
+The `pro_analytics` module can count a JavaScript action as a conversion without redirecting the visitor to a dedicated conversion page. Typical examples are a successful AJAX form submission, a completed checkout widget, or a click that opens an external booking flow.
+
+1. Go to **Settings > Analytics**.
+2. Open the custom conversion events manager.
+3. Create an event with a name, a stable key, and a conversion type. Only enabled conversion types can be assigned.
+4. Keep the event enabled and save the Analytics settings.
+5. Call the injected public helper after the action succeeds:
+
+```html
+<script>
+document.querySelector('#lead-form').addEventListener('submit-success', function () {
+    window.cliponAnalytics?.trackConversion('lead_form_submitted');
+});
+</script>
+```
+
+The optional second argument records the page/path associated with the conversion. If omitted, the current pathname is used:
+
+```js
+window.cliponAnalytics?.trackConversion('booking_completed', '/booking/complete');
+```
+
+Event and type keys may contain lowercase Latin letters, digits, underscores, and hyphens, and are limited to 48 characters. The CMS supports up to 50 custom event rules and 40 custom conversion types. Duplicate event keys are ignored during validation.
+
+The helper sends `category: "conversion"` to the standard public analytics endpoint with the page's analytics token. The server accepts the event only when the PRO Analytics service is available and the matching configured rule is enabled; arbitrary client-supplied event keys are rejected. Privacy/basic collection deduplicates by page-view identifier, while full analytics applies a five-minute session deduplication window for the same event and path.
+
+Custom events contribute to total conversions, conversions by page and type, recent conversions, and PRO attribution data. Page-based conversions through `config/conversions.php` continue to work independently.
 
 ---
 

@@ -2,6 +2,11 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.9.0
+
+- Added configurable custom conversion types to Core analytics.
+- Added PRO custom conversion events with browser-side tracking, server-side rule validation, privacy-mode-aware deduplication, and attribution data.
+
 ## 0.8.1
 
 - Prepared the first public Clipon CMS release and user documentation.

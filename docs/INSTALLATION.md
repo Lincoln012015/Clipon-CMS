@@ -80,6 +80,15 @@ Example editable field:
 
 ## Web Server Notes
 
+The public Integration API is a physical PHP endpoint and needs no extra rewrite rule:
+
+```text
+POST   /clipon/api/integrations.php?provider=PROVIDER_ID
+DELETE /clipon/api/integrations.php?provider=PROVIDER_ID&id=EXTERNAL_ID
+```
+
+Allow PHP execution for this endpoint while continuing to deny direct requests to `modules/`, `config/`, `content/`, `data/`, and `logs/`. Use TLS and ensure a reverse proxy preserves the request method, `Content-Type`, `Content-Length`, `Authorization`, and client address.
+
 Apache releases include a root `.htaccess` that denies direct access to private runtime directories before routing real files.
 
 The shipped Apache rules are relative to the directory containing `.htaccess` and therefore support both a domain root and a subdirectory deployment. Ensure `AllowOverride` permits rewrite and authorization directives. For a subdirectory such as `/cms`, keep `.htaccess` in that directory and open `/cms/clipon/setup.php`; do not add `RewriteBase /`.

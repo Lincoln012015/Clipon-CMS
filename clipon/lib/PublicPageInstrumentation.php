@@ -35,6 +35,11 @@ class PublicPageInstrumentation {
                     headers: { "Content-Type": "application/json" }
                 }).catch(function(){});
             }
+            window.cliponAnalytics = window.cliponAnalytics || {};
+            window.cliponAnalytics.trackConversion = function(eventKey, label) {
+                if (typeof eventKey !== "string" || !eventKey.trim()) return;
+                send({ category: "conversion", action: eventKey.trim(), label: label || window.location.pathname }, false);
+            };
             window.addEventListener("scroll", function() {
                 let h = document.documentElement, b = document.body, st = "scrollTop", sh = "scrollHeight";
                 let denom = ((h[sh]||b[sh]) - h.clientHeight);
@@ -73,6 +78,17 @@ class PublicPageInstrumentation {
         (function() {
             const analyticsToken = ' . json_encode($analyticsToken, JSON_UNESCAPED_UNICODE) . ';
             let triggered = {"25%": false, "50%": false, "75%": false, "100%": false};
+            function send(payload, keepalive) {
+                fetch(' . json_encode($endpointUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ', {
+                    method: "POST", keepalive: !!keepalive, body: JSON.stringify(payload),
+                    headers: { "Content-Type": "application/json", "X-Analytics-Token": analyticsToken }
+                }).catch(function(){});
+            }
+            window.cliponAnalytics = window.cliponAnalytics || {};
+            window.cliponAnalytics.trackConversion = function(eventKey, label) {
+                if (typeof eventKey !== "string" || !eventKey.trim()) return;
+                send({ category: "conversion", action: eventKey.trim(), label: label || window.location.pathname }, false);
+            };
             window.addEventListener("scroll", function() {
                 let h = document.documentElement, b = document.body, st = "scrollTop", sh = "scrollHeight";
                 let denom = ((h[sh]||b[sh]) - h.clientHeight);
@@ -81,22 +97,13 @@ class PublicPageInstrumentation {
                 for (let threshold in triggered) {
                     if (percent >= parseInt(threshold) && !triggered[threshold]) {
                         triggered[threshold] = true;
-                        fetch(' . json_encode($endpointUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ', {
-                            method: "POST",
-                            body: JSON.stringify({ category: "scroll", action: threshold, label: window.location.pathname }),
-                            headers: { "Content-Type": "application/json", "X-Analytics-Token": analyticsToken }
-                        });
+                        send({ category: "scroll", action: threshold, label: window.location.pathname }, false);
                     }
                 }
             });
 
             const sendPulse = () => {
-                fetch(' . json_encode($endpointUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ', {
-                    method: "POST",
-                    keepalive: true,
-                    body: JSON.stringify({ category: "system", action: "timer_pulse" }),
-                    headers: { "Content-Type": "application/json", "X-Analytics-Token": analyticsToken }
-                });
+                send({ category: "system", action: "timer_pulse" }, true);
             };
 
             setInterval(() => { if (document.visibilityState === "visible") sendPulse(); }, 30000);

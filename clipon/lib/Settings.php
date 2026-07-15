@@ -46,6 +46,47 @@ class Settings {
         ];
     }
 
+    public static function sanitizeConversionTypes($types): array {
+        $defaults = self::getDefaultConversionTypes();
+        $defaultMap = [];
+        foreach ($defaults as $item) {
+            $defaultMap[$item['key']] = $item;
+        }
+
+        if (!is_array($types)) return $defaults;
+        $normalized = [];
+        $customCount = 0;
+        foreach ($types as $item) {
+            if (!is_array($item)) continue;
+            $key = strtolower(trim((string)($item['key'] ?? '')));
+            $key = trim((string)(preg_replace('/[^a-z0-9_-]+/', '_', $key) ?? ''), '_-');
+            $key = substr($key, 0, 48);
+            if ($key === '') continue;
+
+            if (isset($normalized[$key])) {
+                continue;
+            }
+
+            if (isset($defaultMap[$key])) {
+                $normalized[$key] = ['key' => $key, 'enabled' => !empty($item['enabled'])];
+                continue;
+            }
+            if ($customCount >= 40) continue;
+
+            $label = trim(strip_tags((string)($item['label'] ?? '')));
+            $label = mb_substr($label !== '' ? $label : ucfirst(str_replace('_', ' ', $key)), 0, 80);
+            $normalized[$key] = [
+                'key' => $key,
+                'label' => $label,
+                'enabled' => !empty($item['enabled']),
+                'custom' => true,
+            ];
+            $customCount++;
+        }
+        if (empty($normalized)) $normalized['conversion'] = $defaultMap['conversion'];
+        return array_values($normalized);
+    }
+
     private static function getDefaultLanguages(): array {
         return [
             ['code' => 'uk', 'name' => 'Українська', 'enabled' => true],
@@ -247,8 +288,12 @@ class Settings {
             $data['enable_attribution'] = true;
         }
 
-        if (!isset($data['conversion_types']) || !is_array($data['conversion_types'])) {
-            $data['conversion_types'] = self::getDefaultConversionTypes();
+        $data['conversion_types'] = self::sanitizeConversionTypes(
+            array_key_exists('conversion_types', $data) ? $data['conversion_types'] : self::getDefaultConversionTypes()
+        );
+
+        if (!isset($data['custom_conversion_events']) || !is_array($data['custom_conversion_events'])) {
+            $data['custom_conversion_events'] = [];
         }
 
         if (!isset($data['powered_by_theme']) || !in_array($data['powered_by_theme'], ['light', 'dark'], true)) {
@@ -282,6 +327,7 @@ class Settings {
         $data = self::sanitizeAnalyticsBotFilterSettings($data);
         $data = self::sanitizeCookieBannerSettings($data);
         $data = self::sanitizeBlogSettings($data);
+        $data['conversion_types'] = self::sanitizeConversionTypes($data['conversion_types'] ?? null);
         if (!isset($data['powered_by_theme']) || !in_array($data['powered_by_theme'], ['light', 'dark'], true)) {
             $data['powered_by_theme'] = 'light';
         }
@@ -404,11 +450,7 @@ class Settings {
 
     public static function getConversionTypes(): array {
         $settings = self::load();
-        if (!isset($settings['conversion_types']) || !is_array($settings['conversion_types'])) {
-            $settings['conversion_types'] = self::getDefaultConversionTypes();
-            self::save($settings);
-        }
-        return $settings['conversion_types'];
+        return self::sanitizeConversionTypes($settings['conversion_types'] ?? []);
     }
 
     public static function getLanguages(): array {

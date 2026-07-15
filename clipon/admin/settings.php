@@ -23,6 +23,8 @@ if (class_exists('License') && !License::isValid() && !empty($settings['powered_
 $conversionTypes = Settings::getConversionTypes();
 $languages = Settings::getLanguages();
 $proAnalyticsAvailable = class_exists('ProAnalyticsPolicy') && ProAnalyticsPolicy::isAvailable();
+$proAnalyticsService = function_exists('registry') && registry()->has('pro_analytics.service') ? registry()->get('pro_analytics.service') : null;
+$customConversionEvents = is_array($settings['custom_conversion_events'] ?? null) ? $settings['custom_conversion_events'] : [];
 $enableFunnels = !empty($settings['enable_funnels']);
 $enableAttribution = !empty($settings['enable_attribution']);
 $historyRetentionDays = isset($settings['history_retention_days']) ? (int)$settings['history_retention_days'] : 90;
@@ -239,20 +241,40 @@ if ($request->isPost()) {
             $baseTypes = Settings::getConversionTypes();
         }
 
-        $postedConversionTypes = $request->post('conversion_types', []);
-        if (!is_array($postedConversionTypes)) {
-            $postedConversionTypes = [];
-        }
-
-        $updated = [];
-        foreach ($baseTypes as $item) {
-            $key = $item['key'] ?? '';
-            if (!$key) continue;
-            $enabled = array_key_exists($key, $postedConversionTypes);
-            $updated[] = ['key' => $key, 'enabled' => $enabled];
+        $postedItems = $request->post('conversion_type_items', null);
+        if (is_array($postedItems)) {
+            $updated = Settings::sanitizeConversionTypes($postedItems);
+        } else {
+            // Backward compatibility with the previous checkbox-only form.
+            $postedConversionTypes = $request->post('conversion_types', []);
+            $postedConversionTypes = is_array($postedConversionTypes) ? $postedConversionTypes : [];
+            $legacyItems = [];
+            foreach ($baseTypes as $item) {
+                $item['enabled'] = array_key_exists((string)($item['key'] ?? ''), $postedConversionTypes);
+                $legacyItems[] = $item;
+            }
+            $updated = Settings::sanitizeConversionTypes($legacyItems);
         }
         $settings['conversion_types'] = $updated;
         $conversionTypes = $updated;
+
+        if ($proAnalyticsAvailable && $proAnalyticsService && method_exists($proAnalyticsService, 'sanitizeCustomConversionEvents')) {
+            $customConversionEvents = $proAnalyticsService->sanitizeCustomConversionEvents($request->post('custom_conversion_events', []));
+            $enabledTypeKeys = [];
+            foreach ($conversionTypes as $conversionType) {
+                if (!empty($conversionType['enabled']) && !empty($conversionType['key'])) {
+                    $enabledTypeKeys[] = (string)$conversionType['key'];
+                }
+            }
+            if (empty($enabledTypeKeys)) $enabledTypeKeys[] = 'conversion';
+            foreach ($customConversionEvents as &$customEvent) {
+                if (!in_array((string)($customEvent['type'] ?? ''), $enabledTypeKeys, true)) {
+                    $customEvent['type'] = $enabledTypeKeys[0] ?? 'conversion';
+                }
+            }
+            unset($customEvent);
+            $settings['custom_conversion_events'] = $customConversionEvents;
+        }
     }
 
     if ($request->post('save_blog') !== null) {

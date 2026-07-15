@@ -17,7 +17,7 @@ Try the live demo: [demo.clipon-cms.com](https://demo.clipon-cms.com/)
 - Media manager with folders, uploads, image/video insertion, and alt text. Localized alt text requires the optional Multilang module.
 - 301/302 redirects and route-map rebuilds.
 - Core administrator account with profile/password management, sessions, CSRF protection, and login throttling. Multiple users, restricted roles, and granular permissions require an optional user-management module.
-- Local analytics with privacy/basic mode, cookie consent for full analytics, bot filtering, GeoIP, UTM/referrer data, and conversions.
+- Local analytics with privacy/basic mode, cookie consent for full analytics, bot filtering, GeoIP, UTM/referrer data, page-based conversions, custom conversion types, and PRO custom conversion events.
 - Base single-primary-language support. Translated content, localized slugs, alternate links, and multilingual sitemap integration require the optional Multilang module; language-switcher and localized-URL helpers must be supplied by that module or the site template and are not guaranteed Core globals.
 - Modular architecture with module providers, hooks, a service registry, runtime module loading, and PRO gates.
 
@@ -54,7 +54,7 @@ The front controller and route map provide clean URLs, page/blog routes, redirec
 
 The admin area is available under `clipon/admin/`. Admin pages and mutation APIs are session-bound and use permission checks and CSRF validation; explicitly public endpoints such as analytics event tracking are documented separately.
 
-Core analytics stores data locally under `data/analytics/` and supports privacy/basic collection without a visitor cookie. Consent-enabled full mode adds visitor/session metrics such as exit pages, bounce rate, and conversion deduplication. Extended reports, funnels, and attribution require the optional PRO analytics module; without it, those screens are locked previews.
+Core analytics stores data locally under `data/analytics/` and supports privacy/basic collection without a visitor cookie. Consent-enabled full mode adds visitor/session metrics such as exit pages, bounce rate, and conversion deduplication. Core supports page-based conversions and custom conversion types; browser-triggered custom conversion events, extended reports, funnels, and attribution require the optional PRO analytics module.
 
 Optional modules are discovered from `modules/<module_id>/module.php`, may provide metadata through `manifest.php`, register services, and attach hooks during boot.
 
@@ -87,9 +87,8 @@ See the documents in `docs/` for the public CMS guides.
 - [Privacy](docs/PRIVACY.md)
 - [Analytics](docs/ANALYTICS_GUIDE.md)
 - [Blog](docs/BLOG_GUIDE.md)
+- [Seonix integration](docs/SEONIX_INTEGRATION.md)
 - [Multilang](docs/MULTILANG_GUIDE.md)
-- [Internal admin endpoints](docs/INTERNAL_ADMIN_API.md)
-- [Release checklist](docs/RELEASE_CHECKLIST.md)
 - [Storage](docs/STORAGE.md)
 - [Upgrade](docs/UPGRADE.md)
 - [Bundled browser dependencies](docs/EXTERNAL_DEPENDENCIES.md)
