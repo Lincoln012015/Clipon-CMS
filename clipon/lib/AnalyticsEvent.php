@@ -22,38 +22,20 @@ class AnalyticsEvent {
         if ($category === '' || $action === '') {
             return;
         }
+        if ($category === 'system') return;
 
         $this->storage->withUpdateLock(function() use ($category, $action, $label) {
             $date = date('Y-m-d');
             $data = $this->storage->loadDay($date);
 
-            if ($category === 'system' && $action === 'timer_pulse') {
-                $now = time();
-                $session = new Session();
-                $lastHit = (int)$session->get('analytics_last_hit_time', (int)$session->get('last_hit_time', 0));
-                $currentUri = $this->normalizeUri((string)$session->get('last_page_uri', ''));
-                if ($currentUri !== '' && $lastHit > 0) {
-                    $this->recordTime($data, $currentUri, $now, $lastHit, 1800);
-                    $sessionId = (string)$session->get('analytics_session_id', '');
-                    $sessionDate = (string)$session->get('analytics_session_date', '');
-                    if ($sessionId !== '' && $sessionDate === $date) {
-                        $this->recordSessionEngagementInData($data, $sessionId, $now, $lastHit);
-                    } else {
-                        $this->recordSessionEngagement($now, $lastHit);
-                    }
-                    $session->set('analytics_last_hit_time', $now);
-                    $session->set('last_hit_time', $now);
-                }
-            } else {
-                if (!isset($data['events'])) $data['events'] = [];
-                if (!isset($data['events'][$category])) $data['events'][$category] = [];
+            if (!isset($data['events'])) $data['events'] = [];
+            if (!isset($data['events'][$category])) $data['events'][$category] = [];
 
-                if ($label !== null && $label !== '') {
-                    if (!isset($data['events'][$category][$label])) $data['events'][$category][$label] = [];
-                    $data['events'][$category][$label][$action] = ($data['events'][$category][$label][$action] ?? 0) + 1;
-                } else {
-                    $data['events'][$category][$action] = ($data['events'][$category][$action] ?? 0) + 1;
-                }
+            if ($label !== null && $label !== '') {
+                if (!isset($data['events'][$category][$label])) $data['events'][$category][$label] = [];
+                $data['events'][$category][$label][$action] = ($data['events'][$category][$label][$action] ?? 0) + 1;
+            } else {
+                $data['events'][$category][$action] = ($data['events'][$category][$action] ?? 0) + 1;
             }
 
             $this->storage->saveDay($date, $data);
@@ -68,23 +50,18 @@ class AnalyticsEvent {
         if ($category === '' || $action === '') {
             return;
         }
+        if ($category === 'system') return;
 
         $this->storage->withUpdateLock(function() use ($category, $action, $label) {
             $date = date('Y-m-d');
             $data = $this->storage->loadDay($date);
 
-            if ($category === 'system' && $action === 'timer_pulse') {
-                $uri = $this->normalizeUri((string)($label ?: '/'));
-                $data['time_on_page'][$uri]['t'] = ($data['time_on_page'][$uri]['t'] ?? 0) + 30;
-                $data['time_on_page'][$uri]['c'] = ($data['time_on_page'][$uri]['c'] ?? 0) + 1;
+            if (!isset($data['events'][$category])) $data['events'][$category] = [];
+            if ($label !== null && $label !== '') {
+                if (!isset($data['events'][$category][$label])) $data['events'][$category][$label] = [];
+                $data['events'][$category][$label][$action] = ($data['events'][$category][$label][$action] ?? 0) + 1;
             } else {
-                if (!isset($data['events'][$category])) $data['events'][$category] = [];
-                if ($label !== null && $label !== '') {
-                    if (!isset($data['events'][$category][$label])) $data['events'][$category][$label] = [];
-                    $data['events'][$category][$label][$action] = ($data['events'][$category][$label][$action] ?? 0) + 1;
-                } else {
-                    $data['events'][$category][$action] = ($data['events'][$category][$action] ?? 0) + 1;
-                }
+                $data['events'][$category][$action] = ($data['events'][$category][$action] ?? 0) + 1;
             }
 
             $this->storage->saveDay($date, $data);

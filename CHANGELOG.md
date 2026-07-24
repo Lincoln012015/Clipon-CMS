@@ -2,12 +2,13 @@
 
 All notable release-facing changes should be documented here.
 
-## 0.9.2
-- remove the custom conversion events layer
-- track enabled conversion types directly from JavaScript
-- add configurable conversion types
-- redesign the conversion type manager
-- update analytics documentation
+## 0.10.0
+
+- Replaced request-time counting with signed, client-confirmed `page_view` events; plain GET, crawler, probe, 404, and 500 requests no longer affect product metrics.
+- Added short-lived HMAC page tokens with key rotation, strict event envelopes, origin checks, rate limits, replay protection, and fail-closed diagnostics.
+- Added 64-way daily state sharding with stable locks, atomic writes, idempotent event transitions, report caching, and schema v3 compaction.
+- Moved tracking into a first-party JavaScript asset with visibility-aware views, bfcache refresh, engagement heartbeats, maximum scroll depth, and conversions.
+- Preserved schema v2 report compatibility while adding open and compacted schema v3 reporting.
 
 ## 0.9.1
 

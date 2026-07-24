@@ -61,8 +61,23 @@ class AnalyticsBotFilter {
     private array $denyPatterns;
 
     public function __construct(array $settings = []) {
-        $this->allowPatterns = $this->sanitizePatterns($settings['analytics_bot_allowlist'] ?? []);
+        $this->allowPatterns = $this->sanitizeAllowlist($settings['analytics_bot_allowlist'] ?? []);
         $this->denyPatterns = $this->sanitizePatterns($settings['analytics_bot_denylist'] ?? []);
+    }
+
+    public static function sanitizeAllowlist($patterns): array {
+        $clean = [];
+        foreach (self::sanitizePatterns($patterns) as $pattern) {
+            if (!preg_match('/^(ua|path):(.+)$/i', $pattern, $match)) continue;
+            $type = strtolower($match[1]);
+            $value = trim($match[2]);
+            $lower = strtolower($value);
+            if ($value === '' || in_array($lower, ['/', 'mozilla', 'chrome', 'safari', 'firefox'], true)) continue;
+            if ($type === 'ua' && strlen($value) < 4) continue;
+            if ($type === 'path' && ($value[0] ?? '') !== '/') continue;
+            $clean[] = $type . ':' . $value;
+        }
+        return $clean;
     }
 
     public static function sanitizePatterns($patterns): array {
@@ -144,7 +159,15 @@ class AnalyticsBotFilter {
     }
 
     private function matchesConfiguredPattern(string $ua, string $path, array $patterns): bool {
-        return $this->matchesAny($ua, $patterns) || $this->matchesAny($path, $patterns);
+        foreach ($patterns as $pattern) {
+            if (str_starts_with($pattern, 'ua:') && stripos($ua, substr($pattern, 3)) !== false) return true;
+            if (str_starts_with($pattern, 'path:')) {
+                $allowed = substr($pattern, 5);
+                if ($path === $allowed || str_starts_with($path, rtrim($allowed, '/') . '/')) return true;
+            }
+            if (!str_contains($pattern, ':') && (stripos($ua, $pattern) !== false || stripos($path, $pattern) !== false)) return true;
+        }
+        return false;
     }
 
     private function matchesAny(string $value, array $patterns): bool {

@@ -17,7 +17,7 @@ Try the live demo: [demo.clipon-cms.com](https://demo.clipon-cms.com/)
 - Media manager with folders, uploads, image/video insertion, and alt text. Localized alt text requires the optional Multilang module.
 - 301/302 redirects and route-map rebuilds.
 - Core administrator account with profile/password management, sessions, CSRF protection, and login throttling. Multiple users, restricted roles, and granular permissions require an optional user-management module.
-- Local analytics with privacy/basic mode, cookie consent for full analytics, bot filtering, GeoIP, UTM/referrer data, page-based conversions, custom conversion types, and direct PRO conversion tracking from JavaScript.
+- Local client-confirmed analytics with privacy/basic mode, signed short-lived page tokens, sharded replay-safe event storage, cookie consent for full analytics, bot filtering, GeoIP, UTM/referrer data, and configurable conversions.
 - Base single-primary-language support. Translated content, localized slugs, alternate links, and multilingual sitemap integration require the optional Multilang module; language-switcher and localized-URL helpers must be supplied by that module or the site template and are not guaranteed Core globals.
 - Modular architecture with module providers, hooks, a service registry, runtime module loading, and PRO gates.
 

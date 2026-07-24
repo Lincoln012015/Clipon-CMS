@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/AnalyticsStorage.php';
+require_once __DIR__ . '/AnalyticsReportCache.php';
 
 /**
  * Base analytics reporting for Dashboard (core).
@@ -27,19 +28,36 @@ class AnalyticsReport {
             $name = basename($file, '.php');
             $data = $this->storage->loadData($file);
 
-            if (strlen($name) === 10 && ($data['version'] ?? null) === 2) {
+            if (strlen($name) === 10 && in_array(($data['version'] ?? null), [2, 3], true)) {
                 if ($name >= $from && $name <= $to) {
-                    $result['total_hits'] += ($data['summary']['hits'] ?? 0);
+                    $hits = (int)($data['summary']['pageviews'] ?? $data['summary']['hits'] ?? 0);
+                    $result['total_hits'] += $hits;
                     foreach (($data['visitors'] ?? []) as $hash => $_) {
                         if (is_string($hash) && $hash !== '') $visitors[$hash] = true;
                     }
                     $result['daily'][$name] = [
-                        'hits' => $data['summary']['hits'] ?? 0,
+                        'hits' => $hits,
                         'uniques' => $data['summary']['uniques'] ?? 0
                     ];
                     $this->mergeCounts($result['top_pages'], $data['pages'] ?? []);
                 }
             }
+        }
+
+        $cursor = strtotime($from . ' 00:00:00 UTC');
+        $end = strtotime($to . ' 00:00:00 UTC');
+        $cache = new AnalyticsReportCache($this->storage->getDataDir());
+        while ($cursor !== false && $end !== false && $cursor <= $end) {
+            $date = gmdate('Y-m-d', $cursor);
+            if (!isset($result['daily'][$date]) && is_dir($this->storage->getDataDir() . '/state/' . $date)) {
+                $data = $cache->load($date);
+                $hits = (int)($data['summary']['pageviews'] ?? 0);
+                $result['total_hits'] += $hits;
+                foreach (($data['visitors'] ?? []) as $hash => $_) if (is_string($hash) && $hash !== '') $visitors[$hash] = true;
+                $result['daily'][$date] = ['hits' => $hits, 'uniques' => (int)($data['summary']['uniques'] ?? 0)];
+                $this->mergeCounts($result['top_pages'], $data['pages'] ?? []);
+            }
+            $cursor += 86400;
         }
 
         $result['total_uniques'] = count($visitors);

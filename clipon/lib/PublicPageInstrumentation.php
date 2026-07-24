@@ -4,6 +4,7 @@ require_once __DIR__ . '/Settings.php';
 require_once __DIR__ . '/PoweredBy.php';
 require_once __DIR__ . '/CookieConsentPolicy.php';
 require_once __DIR__ . '/CookieConsentRenderer.php';
+require_once __DIR__ . '/AnalyticsTokenService.php';
 
 class PublicPageInstrumentation {
     public static function inject(string $html): string {
@@ -13,105 +14,24 @@ class PublicPageInstrumentation {
     }
 
     private static function injectAnalyticsTask(string $html): string {
-        $policy = new CookieConsentPolicy(Settings::load(), new Request());
+        if (http_response_code() >= 400) {
+            return $html;
+        }
+        $request = new Request();
+        $settings = Settings::load();
+        $policy = new CookieConsentPolicy($settings, $request);
         $mode = $policy->analyticsModeForRequest();
         $endpointUrl = self::analyticsEndpointUrl();
-        if ($mode === CookieConsentPolicy::MODE_BASIC) {
-            $pageviewId = CookieConsentPolicy::newPageviewId();
-            $signature = CookieConsentPolicy::signPageviewId($pageviewId);
-            $analyticsJs = '
-        <script>
-        (function() {
-            const pageviewId = ' . json_encode($pageviewId, JSON_UNESCAPED_UNICODE) . ';
-            const signature = ' . json_encode($signature, JSON_UNESCAPED_UNICODE) . ';
-            let triggered = {"25%": false, "50%": false, "75%": false, "100%": false};
-            function send(payload, keepalive) {
-                payload.pageview_id = pageviewId;
-                payload.signature = signature;
-                fetch(' . json_encode($endpointUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ', {
-                    method: "POST",
-                    keepalive: !!keepalive,
-                    body: JSON.stringify(payload),
-                    headers: { "Content-Type": "application/json" }
-                }).catch(function(){});
-            }
-            window.cliponAnalytics = window.cliponAnalytics || {};
-            window.cliponAnalytics.trackConversion = function(typeKey, label) {
-                if (typeof typeKey !== "string" || !typeKey.trim()) return;
-                send({ category: "conversion", action: typeKey.trim(), label: label || window.location.pathname }, false);
-            };
-            window.addEventListener("scroll", function() {
-                let h = document.documentElement, b = document.body, st = "scrollTop", sh = "scrollHeight";
-                let denom = ((h[sh]||b[sh]) - h.clientHeight);
-                if (denom <= 0) return;
-                let percent = (h[st]||b[st]) / denom * 100;
-                for (let threshold in triggered) {
-                    if (percent >= parseInt(threshold) && !triggered[threshold]) {
-                        triggered[threshold] = true;
-                        send({ category: "scroll", action: threshold, label: window.location.pathname }, false);
-                    }
-                }
-            });
-            const sendPulse = () => send({ category: "system", action: "timer_pulse", label: window.location.pathname }, true);
-            setInterval(() => { if (document.visibilityState === "visible") sendPulse(); }, 30000);
-            window.addEventListener("visibilitychange", function() { if (document.visibilityState === "hidden") sendPulse(); });
-        })();
-        </script>';
-
-            return self::appendBeforeBodyClose($html, $analyticsJs);
-        }
-
-        self::ensureSessionStarted();
-        $session = new Session();
-        $analyticsToken = $session->get('analytics_event_token', '');
-        if (!is_string($analyticsToken) || $analyticsToken === '') {
-            try {
-                $analyticsToken = bin2hex(random_bytes(16));
-            } catch (Exception $e) {
-                $analyticsToken = md5(uniqid('analytics', true));
-            }
-            $session->set('analytics_event_token', $analyticsToken);
-        }
-
-        $analyticsJs = '
-        <script>
-        (function() {
-            const analyticsToken = ' . json_encode($analyticsToken, JSON_UNESCAPED_UNICODE) . ';
-            let triggered = {"25%": false, "50%": false, "75%": false, "100%": false};
-            function send(payload, keepalive) {
-                fetch(' . json_encode($endpointUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ', {
-                    method: "POST", keepalive: !!keepalive, body: JSON.stringify(payload),
-                    headers: { "Content-Type": "application/json", "X-Analytics-Token": analyticsToken }
-                }).catch(function(){});
-            }
-            window.cliponAnalytics = window.cliponAnalytics || {};
-            window.cliponAnalytics.trackConversion = function(typeKey, label) {
-                if (typeof typeKey !== "string" || !typeKey.trim()) return;
-                send({ category: "conversion", action: typeKey.trim(), label: label || window.location.pathname }, false);
-            };
-            window.addEventListener("scroll", function() {
-                let h = document.documentElement, b = document.body, st = "scrollTop", sh = "scrollHeight";
-                let denom = ((h[sh]||b[sh]) - h.clientHeight);
-                if (denom <= 0) return;
-                let percent = (h[st]||b[st]) / denom * 100;
-                for (let threshold in triggered) {
-                    if (percent >= parseInt(threshold) && !triggered[threshold]) {
-                        triggered[threshold] = true;
-                        send({ category: "scroll", action: threshold, label: window.location.pathname }, false);
-                    }
-                }
-            });
-
-            const sendPulse = () => {
-                send({ category: "system", action: "timer_pulse" }, true);
-            };
-
-            setInterval(() => { if (document.visibilityState === "visible") sendPulse(); }, 30000);
-            window.addEventListener("visibilitychange", function() { if (document.visibilityState === "hidden") sendPulse(); });
-        })();
-        </script>';
-
-        return self::appendBeforeBodyClose($html, $analyticsJs);
+        $path = AnalyticsTokenService::normalizePath((string)$request->server('REQUEST_URI', '/'));
+        $issued = (new AnalyticsTokenService($settings))->issue($path, $mode, self::context($request));
+        $config = [
+            'version' => 1, 'endpoint' => $endpointUrl, 'tokenEndpoint' => self::analyticsTokenEndpointUrl(),
+            'path' => $path, 'pageviewId' => $issued['pageview_id'], 'token' => $issued['token'],
+        ];
+        $json = json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $snippet = '<script type="application/json" id="clipon-analytics-config">' . $json . '</script>'
+            . '<script src="' . htmlspecialchars(self::analyticsAssetUrl(), ENT_QUOTES, 'UTF-8') . '" defer></script>';
+        return self::appendBeforeBodyClose($html, $snippet);
     }
 
     private static function appendBeforeBodyClose(string $html, string $snippet): string {
@@ -138,5 +58,33 @@ class PublicPageInstrumentation {
         }
 
         return $base . '/clipon/admin/api/track_event.php';
+    }
+
+    private static function analyticsTokenEndpointUrl(): string {
+        return preg_replace('#track_event\\.php$#', 'analytics_token.php', self::analyticsEndpointUrl());
+    }
+
+    private static function analyticsAssetUrl(): string {
+        $base = defined('C_BASE_URL') ? rtrim((string)C_BASE_URL, '/') : '';
+        return $base . '/clipon/assets/js/analytics.js';
+    }
+
+    private static function context(Request $request): array {
+        $ua = strtolower((string)$request->server('HTTP_USER_AGENT', ''));
+        $device = preg_match('/mobile|android|iphone/', $ua) ? 'mobile' : (preg_match('/tablet|ipad/', $ua) ? 'tablet' : 'desktop');
+        $language = strtolower(substr((string)$request->server('HTTP_ACCEPT_LANGUAGE', 'unknown'), 0, 2));
+        $refHost = strtolower((string)parse_url((string)$request->server('HTTP_REFERER', ''), PHP_URL_HOST));
+        $host = strtolower((string)$request->server('HTTP_HOST', ''));
+        $utm = [];
+        foreach (['utm_source', 'utm_medium', 'utm_campaign'] as $key) {
+            $value = $request->query($key);
+            if (is_string($value) && trim($value) !== '') $utm[$key] = trim($value);
+        }
+        return [
+            'device' => $device, 'language' => preg_match('/^[a-z]{2}$/', $language) ? $language : 'unknown',
+            'country' => strtoupper(substr((string)$request->server('HTTP_CF_IPCOUNTRY', 'unknown'), 0, 2)),
+            'referrer_type' => $refHost === '' ? 'direct' : ($refHost === $host ? 'internal' : 'external'),
+            'referrer' => $refHost === '' ? 'direct' : $refHost, 'utm' => $utm,
+        ];
     }
 }

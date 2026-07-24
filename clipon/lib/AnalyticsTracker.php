@@ -27,6 +27,10 @@ class AnalyticsTracker {
     }
 
     public function track(): void {
+        // HTTP GET requests are intentionally not page views. Collection starts
+        // only after AnalyticsEventIngestor accepts a signed client page_view.
+        return;
+
         global $request, $session;
 
         $uri = (string)$request->server('REQUEST_URI', '');

@@ -12,7 +12,7 @@ if ($rawBasePath !== '' && strpos($rawBasePath, '/clipon') !== 0 && strpos($norm
 }
 if ($normalizedRawPath === '') $normalizedRawPath = '/';
 
-$isAnalyticsEventEndpoint = preg_match('#^/clipon/admin/api/track_event\.php$#', $normalizedRawPath);
+$isAnalyticsEventEndpoint = preg_match('#^/clipon/admin/api/(?:track_event|analytics_token)\.php$#', $normalizedRawPath);
 $needsSessionAwareBootstrap = isset($_GET['edit'])
     || (!$isAnalyticsEventEndpoint && preg_match('#^/clipon/(admin|setup\.php|save\.php|load\.php|check_edit\.php|index\.php)(/|$)#', $normalizedRawPath));
 
@@ -41,12 +41,11 @@ function clipon_prepare_public_analytics_session(): void {
 }
 
 function clipon_track_public_request(): void {
-    clipon_prepare_public_analytics_session();
-    Analytics::track();
+    // Page views are accepted only through the signed client event pipeline.
 }
 
 // Allow direct access to CMS admin files
-$requestPath = parse_url((string) $request->server('REQUEST_URI', '/'), PHP_URL_PATH);
+$requestPath = parse_url((string) $request->server('REQUEST_URI', '/'), PHP_URL_PATH) ?: '/';
 
 // Базова корекція шляху, якщо сайт знаходиться в підпапці
 $scriptName = (string) $request->server('SCRIPT_NAME', '/index.php');

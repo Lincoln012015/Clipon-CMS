@@ -7,11 +7,15 @@
  * public route. Only safe, idempotent requests are redirected.
  */
 function clipon_trailing_slash_redirect_target(
-    string $requestPath,
+    ?string $requestPath,
     string $basePath = '',
     string $queryString = '',
     string $requestMethod = 'GET'
 ): ?string {
+    if ($requestPath === null || $requestPath === '') {
+        return null;
+    }
+
     $method = strtoupper($requestMethod);
     if ($method !== 'GET' && $method !== 'HEAD') {
         return null;

@@ -440,7 +440,7 @@ class Settings {
     }
 
     public static function sanitizeAnalyticsBotFilterSettings(array $data): array {
-        $data['analytics_bot_allowlist'] = AnalyticsBotFilter::sanitizePatterns($data['analytics_bot_allowlist'] ?? []);
+        $data['analytics_bot_allowlist'] = AnalyticsBotFilter::sanitizeAllowlist($data['analytics_bot_allowlist'] ?? []);
         $data['analytics_bot_denylist'] = AnalyticsBotFilter::sanitizePatterns($data['analytics_bot_denylist'] ?? []);
         $data['analytics_bot_filter_debug'] = !empty($data['analytics_bot_filter_debug']);
         return $data;

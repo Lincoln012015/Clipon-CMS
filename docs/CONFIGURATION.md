@@ -78,6 +78,12 @@ CMS update and license clients use the production service URLs defined in `clipo
 
 Runtime update cache is stored in `config/updates.php`. It is not the source of truth for the current CMS version, which is `clipon/config/version.php`.
 
+### Analytics event security
+
+The analytics pipeline stores `analytics_signing_keys` as a `kid => secret` map and `analytics_active_kid` as the key used for newly issued page tokens. CMS 0.10.0 generates and saves a random 256-bit key on first use. Keep the previous key in the map during rotation until all ten-minute tokens issued with it have expired. Never publish these values.
+
+Bot-filter allowlist entries must use an explicit `ua:<fragment>` or `path:<path-or-prefix>` form. Empty and overly broad entries such as `/`, `mozilla`, or `chrome` are discarded. Allowlisting bypasses only heuristic bot/probe matching; token expiry, replay protection, origin checks, and rate limiting still apply.
+
 ## Runtime-Only State
 
 Do not copy local runtime state between unrelated installs unless intentionally migrating a site:

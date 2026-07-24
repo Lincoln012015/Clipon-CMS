@@ -18,6 +18,12 @@ This blocks direct web reads while allowing the CMS to strip the guard and decod
 - `content/blog/` - blog post content.
 - `content/history/` - saved versions.
 - `config/` - settings, route maps, directories, conversions, update state.
+
+## Analytics storage
+
+Open-day analytics is stored under `data/analytics/state/YYYY-MM-DD/` in 64 deterministic shards (`00.php`–`3f.php`). Each shard has a stable companion lock and is updated with a temporary file plus atomic rename. `data/analytics/cache/YYYY-MM-DD.php` is a disposable 60-second report cache and is never a source of truth. Rate-limit buckets live separately under `data/analytics/rate/`.
+
+After the UTC day and grace period close, compaction rebuilds `data/analytics/YYYY-MM-DD.php` as schema v3 and records an input checksum manifest. Older schema v2 day files remain readable. Do not delete an open or uncompacted state directory; cache files may be deleted safely.
 - `data/analytics/` - daily analytics files and locks.
 - `data/geoip/` - GeoIP datasets/status.
 - `data/blog_tags.php` - localized tag dictionary.
