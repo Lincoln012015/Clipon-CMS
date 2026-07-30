@@ -74,7 +74,7 @@ if ($isMissingPackage) {
     $bannerTitle = $moduleLabel . ' - ' . $tr('pro_smart_stub_suffix_cms_update_required', 'CMS update required');
     $bannerDescription = $tr('pro_cms_incompatible_description', 'This module requires a newer CMS version.') . ' >= ' . $minCmsVersion;
     $bannerCta = $tr('pro_cms_incompatible_cta', 'Update CMS');
-    $bannerHref = 'https://clipon-cms.com/dist/';
+    $bannerHref = 'https://server.clipon-cms.com/download/latest';
 } elseif ($releaseStatus === 'in_development') {
     $bannerVariant = 'locked';
     $bannerTitle = $moduleLabel . ' - ' . $tr('pro_smart_stub_suffix_in_development', 'in development');

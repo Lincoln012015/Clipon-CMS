@@ -15,13 +15,14 @@ $role = is_string($session->get('role')) ? $session->get('role') : 'unknown';
 
 require_once __DIR__ . '/../lib/Analytics.php';
 
-// Фільтрація за датою для базової аналітики
-$from = $request->query('from', date('Y-m-d', strtotime('-7 days')));
-$to = $request->query('to', date('Y-m-d'));
+// Use the same UTC reporting window as the full analytics page.
+$to = $request->query('to', gmdate('Y-m-d'));
+$from = $request->query('from', gmdate('Y-m-d', strtotime('-29 days UTC')));
 
 // Валідація дат
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = date('Y-m-d', strtotime('-7 days'));
-if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = date('Y-m-d');
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = gmdate('Y-m-d', strtotime('-29 days UTC'));
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = gmdate('Y-m-d');
+if ($from > $to) [$from, $to] = [$to, $from];
 
 $stats = Analytics::getBasicStats($from, $to);
 ?>
@@ -32,7 +33,7 @@ $stats = Analytics::getBasicStats($from, $to);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= __('admin_title') ?> - Admin</title>
-    <link rel="stylesheet" href="<?= C_ASSETS_URL ?>/css/admin.css?v=15">
+    <link rel="stylesheet" href="<?= C_ASSETS_URL ?>/css/admin.css?v=19">
     <link rel="stylesheet" href="<?= C_ASSETS_URL ?>/css/admin-analytics.css">
 </head>
 <body>

@@ -6,9 +6,12 @@
                     <input type="date" name="to" value="<?= htmlspecialchars($to) ?>">
                 </div>
                 <button type="submit" class="btn-apply"><?= __('analytics_apply') ?></button>
-                <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                    <a href="?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?>" class="bg-secondary-btn"><?= __('analytics_today') ?></a>
-                    <a href="?from=<?= date('Y-m-d', strtotime('-30 days')) ?>&to=<?= date('Y-m-d') ?>" class="bg-secondary-btn"><?= __('analytics_last_30_days') ?></a>
+                <div style="margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="?from=<?= gmdate('Y-m-d') ?>&to=<?= gmdate('Y-m-d') ?>" class="bg-secondary-btn"><?= __('analytics_today') ?></a>
+                    <a href="?from=<?= gmdate('Y-m-d', strtotime('-1 day UTC')) ?>&to=<?= gmdate('Y-m-d', strtotime('-1 day UTC')) ?>" class="bg-secondary-btn"><?= __('analytics_yesterday') ?></a>
+                    <a href="?from=<?= gmdate('Y-m-d', strtotime('-2 days UTC')) ?>&to=<?= gmdate('Y-m-d') ?>" class="bg-secondary-btn"><?= __('analytics_last_3_days') ?></a>
+                    <a href="?from=<?= gmdate('Y-m-d', strtotime('-6 days UTC')) ?>&to=<?= gmdate('Y-m-d') ?>" class="bg-secondary-btn"><?= __('analytics_last_7_days') ?></a>
+                    <a href="?from=<?= gmdate('Y-m-d', strtotime('-29 days UTC')) ?>&to=<?= gmdate('Y-m-d') ?>" class="bg-secondary-btn"><?= __('analytics_last_30_days') ?></a>
                 </div>
             </form>
 

@@ -51,14 +51,26 @@
     <?php else: ?>
     <button type="submit" class="btn-apply"><?= __('analytics_apply') ?></button>
     <?php endif; ?>
-    <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+    <div style="margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap;">
         <?php if (($analyticsLockedButton ?? null) && $analyticsLockedButton(__('analytics_today'), ['class' => 'bg-secondary-btn'])): ?>
         <?php else: ?>
-        <a href="?from=<?= date('Y-m-d') ?>&to=<?= date('Y-m-d') ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_today') ?></a>
+        <a href="?from=<?= gmdate('Y-m-d') ?>&to=<?= gmdate('Y-m-d') ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_today') ?></a>
+        <?php endif; ?>
+        <?php if (($analyticsLockedButton ?? null) && $analyticsLockedButton(__('analytics_yesterday'), ['class' => 'bg-secondary-btn'])): ?>
+        <?php else: ?>
+        <a href="?from=<?= gmdate('Y-m-d', strtotime('-1 day UTC')) ?>&to=<?= gmdate('Y-m-d', strtotime('-1 day UTC')) ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_yesterday') ?></a>
+        <?php endif; ?>
+        <?php if (($analyticsLockedButton ?? null) && $analyticsLockedButton(__('analytics_last_3_days'), ['class' => 'bg-secondary-btn'])): ?>
+        <?php else: ?>
+        <a href="?from=<?= gmdate('Y-m-d', strtotime('-2 days UTC')) ?>&to=<?= gmdate('Y-m-d') ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_last_3_days') ?></a>
+        <?php endif; ?>
+        <?php if (($analyticsLockedButton ?? null) && $analyticsLockedButton(__('analytics_last_7_days'), ['class' => 'bg-secondary-btn'])): ?>
+        <?php else: ?>
+        <a href="?from=<?= gmdate('Y-m-d', strtotime('-6 days UTC')) ?>&to=<?= gmdate('Y-m-d') ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_last_7_days') ?></a>
         <?php endif; ?>
         <?php if (($analyticsLockedButton ?? null) && $analyticsLockedButton(__('analytics_last_30_days'), ['class' => 'bg-secondary-btn'])): ?>
         <?php else: ?>
-        <a href="?from=<?= date('Y-m-d', strtotime('-30 days')) ?>&to=<?= date('Y-m-d') ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_last_30_days') ?></a>
+        <a href="?from=<?= gmdate('Y-m-d', strtotime('-29 days UTC')) ?>&to=<?= gmdate('Y-m-d') ?><?= isset($selectedFunnelId) && $selectedFunnelId !== '' ? '&funnel_id=' . urlencode($selectedFunnelId) : '' ?>" class="bg-secondary-btn"><?= __('analytics_last_30_days') ?></a>
         <?php endif; ?>
     </div>
 </form>

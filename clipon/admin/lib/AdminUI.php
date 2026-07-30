@@ -394,7 +394,7 @@ class AdminUI {
             'title' => self::tr('pro_cms_incompatible_title', 'CMS update required'),
             'description' => self::tr('pro_cms_incompatible_description', 'This module requires a newer CMS version.') . ' >= ' . $minCmsVersion,
             'cta' => self::tr('pro_cms_incompatible_cta', 'Update CMS'),
-            'href' => 'https://clipon-cms.com/dist/'
+            'href' => 'https://server.clipon-cms.com/download/latest'
         ]);
     }
 }

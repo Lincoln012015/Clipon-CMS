@@ -2,6 +2,25 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.10.3
+
+- Added the automated Core release pipeline that publishes the sanitized public source, immutable GitHub tag, ZIP archive, and SHA-256 checksum from one deterministic export.
+- Integrated stable releases with the protected license-server Release API and added end-to-end verification of public metadata, the CMS update API, and the latest-download redirect.
+- Replaced version-specific website and Core download URLs with the permanent `https://server.clipon-cms.com/download/latest` endpoint.
+- Added regression coverage for release workflow helpers, stable download links, and preservation of Core update version, package URL, changelog, and SHA-256 metadata.
+
+## 0.10.2
+
+- Fixed Dashboard and Pro Analytics synchronization by using live schema v3 state as the authoritative source for open days instead of stale daily snapshots.
+- Unified analytics date validation, UTC reporting windows, and the default 30-day period across Dashboard and Pro Analytics.
+- Added quick analytics filters for today, yesterday, the last 3 days, the last 7 days, and the last 30 days.
+- Added regression coverage to ensure Dashboard and Pro Analytics return matching live page-view and unique-visitor totals.
+
+## 0.10.1
+
+- Added German translation.
+- Fixed a bug that caused outdated button styles to be used.
+
 ## 0.10.0
 
 - Replaced request-time counting with signed, client-confirmed `page_view` events; plain GET, crawler, probe, 404, and 500 requests no longer affect product metrics.

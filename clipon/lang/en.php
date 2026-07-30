@@ -681,6 +681,8 @@ return [
     'analytics_period' => 'Period',
     'analytics_apply' => 'Apply',
     'analytics_today' => 'Today',
+    'analytics_yesterday' => 'Yesterday',
+    'analytics_last_3_days' => 'Last 3 days',
     'analytics_last_7_days' => 'Last 7 days',
     'analytics_last_30_days' => 'Last 30 days',
     'analytics_view_full' => 'View full analytics',

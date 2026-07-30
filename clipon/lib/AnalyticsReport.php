@@ -30,6 +30,11 @@ class AnalyticsReport {
 
             if (strlen($name) === 10 && in_array(($data['version'] ?? null), [2, 3], true)) {
                 if ($name >= $from && $name <= $to) {
+                    // Open v3 days are authoritative: their state may be newer than
+                    // an existing snapshot produced by an earlier compaction.
+                    if ($this->hasLiveState($name)) {
+                        continue;
+                    }
                     $hits = (int)($data['summary']['pageviews'] ?? $data['summary']['hits'] ?? 0);
                     $result['total_hits'] += $hits;
                     foreach (($data['visitors'] ?? []) as $hash => $_) {
@@ -49,7 +54,7 @@ class AnalyticsReport {
         $cache = new AnalyticsReportCache($this->storage->getDataDir());
         while ($cursor !== false && $end !== false && $cursor <= $end) {
             $date = gmdate('Y-m-d', $cursor);
-            if (!isset($result['daily'][$date]) && is_dir($this->storage->getDataDir() . '/state/' . $date)) {
+            if ($this->hasLiveState($date)) {
                 $data = $cache->load($date);
                 $hits = (int)($data['summary']['pageviews'] ?? 0);
                 $result['total_hits'] += $hits;
@@ -65,6 +70,10 @@ class AnalyticsReport {
         $result['top_pages'] = array_slice($result['top_pages'], 0, 5, true);
 
         return $result;
+    }
+
+    private function hasLiveState(string $date): bool {
+        return is_dir(rtrim($this->storage->getDataDir(), '/\\') . '/state/' . $date);
     }
 
     protected function mergeCounts(array &$target, array $source): void {

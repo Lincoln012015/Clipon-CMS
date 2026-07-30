@@ -17,8 +17,11 @@ if (!hasPermission('view_analytics')) {
 
 $user = is_string($session->get('user')) ? $session->get('user') : 'unknown';
 
-$to = $request->query('to', date('Y-m-d'));
-$from = $request->query('from', date('Y-m-d', strtotime('-30 days')));
+$to = $request->query('to', gmdate('Y-m-d'));
+$from = $request->query('from', gmdate('Y-m-d', strtotime('-29 days UTC')));
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = gmdate('Y-m-d', strtotime('-29 days UTC'));
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)) $to = gmdate('Y-m-d');
+if ($from > $to) [$from, $to] = [$to, $from];
 
 $settings = Settings::load();
 $attrEnabled = !empty($settings['enable_attribution']);
@@ -36,7 +39,7 @@ $stats = clipon_pro_analytics_service()->getAttributionViewData($from, $to);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= __('analytics_attribution_tab') ?> - Admin</title>
-    <link rel="stylesheet" href="<?= C_ASSETS_URL ?>/css/admin.css?v=15">
+    <link rel="stylesheet" href="<?= C_ASSETS_URL ?>/css/admin.css?v=19">
     <link rel="stylesheet" href="<?= C_ASSETS_URL ?>/css/admin-analytics.css">
 </head>
 <body>
