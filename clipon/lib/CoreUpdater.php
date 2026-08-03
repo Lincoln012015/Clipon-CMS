@@ -149,6 +149,36 @@ class CoreUpdater
         return self::requestUpdateInfo('manual');
     }
 
+    public static function installAvailableUpdate(): array
+    {
+        $updateInfo = self::getUpdateInfo();
+        if (!is_array($updateInfo) || empty($updateInfo['version'])) {
+            return ['success' => false, 'error' => 'update_not_available'];
+        }
+
+        $checksum = strtolower(trim((string)($updateInfo['checksum_sha256'] ?? '')));
+        if (!preg_match('/^[a-f0-9]{64}$/', $checksum)) {
+            return ['success' => false, 'error' => 'missing_or_invalid_checksum'];
+        }
+
+        $installer = new CoreUpdateInstaller();
+        $result = $installer->install($updateInfo);
+        if (!empty($result['success'])) {
+            self::$stateData['core_update_info'] = null;
+            self::$stateData['last_check_status'] = [
+                'core_available' => false,
+                'core_version' => (string)($result['version'] ?? ''),
+                'core_url' => null,
+                'changelog' => '',
+                'checksum_sha256' => (string)($result['checksum_sha256'] ?? ''),
+                'checked_at' => date('Y-m-d H:i:s'),
+            ];
+            self::$stateData['next_check_target'] = time() + 86400;
+            self::saveState();
+        }
+        return $result;
+    }
+
     public static function syncInternalState(): ?array
     {
         self::loadState();

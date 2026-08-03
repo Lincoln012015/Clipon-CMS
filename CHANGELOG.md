@@ -2,6 +2,15 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.11.0
+
+- Added authenticated one-click Core installation from the CMS administration panel.
+- Made SHA-256 verification mandatory before extraction or installation and reject missing, malformed, or mismatched checksums.
+- Added safe ZIP extraction with traversal protection, release-version validation, integrity-manifest verification, archive limits, and downgrade prevention.
+- Preserve site-owned runtime data during Core replacement, retain the previous Core under `.clipon_backups/core_updates`, and automatically roll back partial installations.
+- Added CI coverage for branch pushes and pull requests, including repository audits, PHP checks, Core smoke tests, deterministic public export verification, and license-server tests.
+- Added regression tests for valid installation, checksum failures, corrupt archives, unsafe ZIP paths, integrity failures, repeated versions, runtime-data preservation, and rollback.
+
 ## 0.10.3
 
 - Added the automated Core release pipeline that publishes the sanitized public source, immutable GitHub tag, ZIP archive, and SHA-256 checksum from one deterministic export.

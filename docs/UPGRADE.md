@@ -25,6 +25,22 @@ Runtime state:
 
 ## Upgrade Steps
 
+### Automatic Core Upgrade (0.11.0 and newer)
+
+1. Open **Admin → Settings → License & Updates**.
+2. Select **Check for updates**.
+3. Review the version and changelog, then select **Install Core update**.
+4. Keep the browser open while the package is downloaded, verified, and installed.
+5. After the page reloads, confirm the displayed CMS version and run public/admin QA.
+
+Automatic installation fails closed unless the release supplies a valid SHA-256 checksum. Before changing system files, the updater also validates the package version, ZIP paths, archive limits, and `clipon/config/integrity_manifest.php`. It rejects the same or an older version.
+
+The updater replaces only the release-managed `clipon/`, root `index.php`, and root `.htaccess`. Site-owned runtime directories remain untouched. The previous Core is retained under `.clipon_backups/core_updates/`. If a failure occurs after replacement starts, the installer restores the previous Core and root files automatically.
+
+The PHP process must be able to write to the installation root and rename the `clipon/` directory during this controlled operation. Normal runtime may keep Core files read-only; grant update permissions only for the upgrade window and remove them afterward. PHP cURL and ZipArchive are required for automatic installation.
+
+### Manual Core Upgrade
+
 1. Put the site into maintenance mode if possible.
 2. Remove or move aside the old `clipon/` system directory, then install the new `clipon/` directory as a clean tree. Do not overlay it: an overlay can retain core files removed by the new release.
 3. Do not copy the old `clipon/config/` over the new directory. It contains release-owned defaults and integrity metadata, not the site-owned root `config/` runtime directory.
@@ -47,7 +63,7 @@ The setup environment-check step on a not-yet-installed staging copy verifies th
 
 ## Rollback
 
-Restore the previous `clipon/`, root `index.php`, root `.htaccess`, and runtime backup. Verify admin login, public routes, blog, media, redirects, and analytics.
+For an automatically installed update, locate the retained backup reported under `.clipon_backups/core_updates/`. If automatic rollback already succeeded, verify the restored version before taking further action. For manual recovery, restore the backup's `clipon/`, root `index.php`, and root `.htaccess`; restore runtime data only if it was changed separately. Verify admin login, public routes, blog, media, redirects, and analytics.
 
 ## Migrations
 

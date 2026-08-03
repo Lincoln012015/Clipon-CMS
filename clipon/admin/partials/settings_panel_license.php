@@ -112,6 +112,12 @@
 
                 <div class="license-update-actions">
                     <button type="button" id="manualCheckUpdatesBtn" class="btn btn-secondary"><?= __('settings_license_check_updates_btn') ?></button>
+                    <button
+                        type="button"
+                        id="installCoreUpdateBtn"
+                        class="btn btn-primary"
+                        <?= !(is_array($updateInfo) && !empty($updateInfo['version'])) ? 'hidden' : '' ?>
+                    ><?= __('settings_updates_install') ?></button>
                     <?php if (!empty($lic_data['last_verified'])): ?>
                         <span class="license-update-caption"><?= __('settings_license_last_check') ?> <?= htmlspecialchars($lic_data['last_verified'], ENT_QUOTES, 'UTF-8') ?></span>
                     <?php endif; ?>

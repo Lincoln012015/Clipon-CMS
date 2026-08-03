@@ -52,7 +52,7 @@ assets/uploads/
 
 If neither workflow is configured, setup will report the runtime-directory check as failed. Do not look for empty runtime directories in the ZIP.
 
-Keep `clipon/` read-only during normal runtime. It should only be writable during a controlled update process.
+Keep `clipon/` read-only during normal runtime. For the automatic Core installer, the PHP process must temporarily be able to write to the installation root and rename `clipon/`; remove those permissions after the controlled update window. Automatic installation also requires PHP cURL and ZipArchive.
 
 ## First Admin Setup
 

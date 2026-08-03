@@ -4,10 +4,10 @@
 
 | Version | Supported |
 | --- | --- |
-| 0.8.x | Yes |
-| < 0.8 | No |
+| 0.11.x | Yes |
+| < 0.11 | No |
 
-Only the latest patch release in the supported `0.8.x` line is guaranteed to receive security fixes. Upgrade before reporting an issue that is already resolved in a newer patch.
+Only the latest patch release in the supported `0.11.x` line is guaranteed to receive security fixes. Upgrade before reporting an issue that is already resolved in a newer patch.
 
 ## Reporting A Vulnerability
 

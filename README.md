@@ -20,6 +20,7 @@ Try the live demo: [demo.clipon-cms.com](https://demo.clipon-cms.com/)
 - Local client-confirmed analytics with privacy/basic mode, signed short-lived page tokens, sharded replay-safe event storage, cookie consent for full analytics, bot filtering, GeoIP, UTM/referrer data, and configurable conversions.
 - Base single-primary-language support. Translated content, localized slugs, alternate links, and multilingual sitemap integration require the optional Multilang module; language-switcher and localized-URL helpers must be supplied by that module or the site template and are not guaranteed Core globals.
 - Modular architecture with module providers, hooks, a service registry, runtime module loading, and PRO gates.
+- Authenticated Core updates with mandatory SHA-256 and integrity-manifest verification, retained backups, and automatic rollback.
 
 ## Requirements
 
@@ -27,6 +28,7 @@ Try the live demo: [demo.clipon-cms.com](https://demo.clipon-cms.com/)
 - Apache or Nginx with PHP support.
 - Writable runtime directories: `content/`, `config/`, `data/`, `logs/`, `modules/`, `templates/`, and `assets/uploads/`.
 - Optional GeoIP/license/update downloads require outbound HTTPS and PHP cURL or enabled URL streams.
+- Automatic Core installation requires PHP cURL and ZipArchive plus temporary write access to the installation root.
 
 Node.js, Composer, and MySQL are not required for normal CMS operation.
 

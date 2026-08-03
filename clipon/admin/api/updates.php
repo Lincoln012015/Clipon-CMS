@@ -13,12 +13,20 @@ if (!Csrf::validate($csrfToken)) {
 $action = (string)$request->post('action', '');
 $manualKey = (string)$request->post('license_key', '');
 
-if ($action !== 'check_all_updates') {
+if (!in_array($action, ['check_all_updates', 'install_core_update'], true)) {
     AdminResponder::jsonError('Unsupported action', 400);
 }
 
 if (!class_exists('CoreUpdater')) {
     AdminResponder::jsonError('Core updater unavailable', 500);
+}
+
+if ($action === 'install_core_update') {
+    $result = CoreUpdater::installAvailableUpdate();
+    if (empty($result['success'])) {
+        AdminResponder::jsonError('Core update installation failed', 422, ['core' => $result]);
+    }
+    AdminResponder::jsonSuccess(['core' => $result]);
 }
 
 $coreResult = CoreUpdater::checkForCoreUpdatesManual();

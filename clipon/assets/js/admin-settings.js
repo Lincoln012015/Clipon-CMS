@@ -329,6 +329,7 @@
 
     function initializeManualUpdateCheck(config) {
         var manualCheckBtn = document.getElementById('manualCheckUpdatesBtn');
+        var installCoreBtn = document.getElementById('installCoreUpdateBtn');
         var manualCheckStatus = document.getElementById('manualCheckUpdatesStatus');
         var changelogContainer = document.getElementById('manualCheckChangelogContainer');
         if (!manualCheckBtn || !manualCheckStatus || !changelogContainer) {
@@ -531,6 +532,9 @@
                         checked_at: new Date().toISOString().slice(0, 19).replace('T', ' ')
                     };
                     renderCheckStatus(currentStatus, pro);
+                    if (installCoreBtn) {
+                        installCoreBtn.hidden = !(updateInfo && updateInfo.version);
+                    }
                 })
                 .catch(function () {
                     manualCheckStatus.style.color = '#b91c1c';
@@ -548,6 +552,53 @@
                     manualCheckBtn.disabled = false;
                 });
         });
+
+        if (installCoreBtn) {
+            installCoreBtn.addEventListener('click', function () {
+                if (!window.confirm(String(config.langUpdates.install_confirm || 'Install this Core update now?'))) {
+                    return;
+                }
+
+                installCoreBtn.disabled = true;
+                manualCheckBtn.disabled = true;
+                manualCheckStatus.style.display = 'block';
+                manualCheckStatus.style.color = '#666';
+                manualCheckStatus.textContent = String(config.langUpdates.installing || 'Installing Core update...');
+
+                var body = new URLSearchParams();
+                body.set('action', 'install_core_update');
+                body.set('csrf_token', config.csrfToken || '');
+
+                fetch(config.updatesApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: body.toString()
+                })
+                    .then(function (response) {
+                        return response.json().catch(function () { return null; });
+                    })
+                    .then(function (data) {
+                        if (!data || data.status !== 'success') {
+                            var detail = data && data.core && data.core.error ? ': ' + String(data.core.error) : '';
+                            throw new Error(String(config.langUpdates.install_error || 'Core update installation failed.') + detail);
+                        }
+                        manualCheckStatus.style.color = '#166534';
+                        manualCheckStatus.textContent = String(config.langUpdates.install_success || 'Core update installed. Reloading...');
+                        window.setTimeout(function () { window.location.reload(); }, 1000);
+                    })
+                    .catch(function (error) {
+                        manualCheckStatus.style.color = '#b91c1c';
+                        manualCheckStatus.textContent = error && error.message
+                            ? error.message
+                            : String(config.langUpdates.install_error || 'Core update installation failed.');
+                        installCoreBtn.disabled = false;
+                        manualCheckBtn.disabled = false;
+                    });
+            });
+        }
     }
 
     function initializeGeoIpUpdateButton(config) {
