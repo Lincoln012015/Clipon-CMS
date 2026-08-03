@@ -524,6 +524,10 @@ body {
 }
 
 /* UI Elements */
+[hidden] {
+    display: none !important;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;

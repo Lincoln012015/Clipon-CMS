@@ -2,6 +2,13 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.11.1
+
+- Fixed the **Install Core update** button remaining visible when no newer Core version is available, including when stale update metadata exists.
+- Changed the named GitHub Release ZIP to contain only the installable CMS runtime (`index.php`, `.htaccess`, `clipon/`) and `LICENSE`, while keeping documentation and project assets in the public repository.
+- Added deterministic archive-content validation that rejects documentation, screenshots, and other repository-only files from the runtime ZIP.
+- Added separate public-export and runtime-ZIP file counts to the GitHub Actions release summary.
+
 ## 0.11.0
 
 - Added authenticated one-click Core installation from the CMS administration panel.

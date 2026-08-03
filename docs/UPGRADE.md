@@ -4,6 +4,8 @@
 
 Clipon is designed so system files can be replaced while site-owned runtime state remains outside them.
 
+The official `cms-clipon-vX.Y.Z.zip` release asset contains only the installable CMS (`index.php`, `.htaccess`, `clipon/`) and `LICENSE`. GitHub's automatically generated **Source code** archives mirror the full public repository and also contain documentation; use the named `cms-clipon-vX.Y.Z.zip` asset for installation and automatic updates.
+
 Runtime state:
 
 - `content/`

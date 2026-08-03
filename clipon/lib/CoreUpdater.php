@@ -88,7 +88,16 @@ class CoreUpdater
     {
         self::loadState();
         $info = self::$stateData['core_update_info'] ?? null;
-        return is_array($info) ? $info : null;
+        if (!is_array($info)) {
+            return null;
+        }
+
+        $version = trim((string)($info['version'] ?? ''));
+        if (!CmsVersion::isValid($version) || CmsVersion::compare($version, CmsVersion::current()) <= 0) {
+            return null;
+        }
+
+        return $info;
     }
 
     public static function getPromoModules(): array

@@ -5,7 +5,7 @@ return array (
   array (
     'clipon/bootstrap.php' => '865f34d54c58d37828f938d584d7cb4e3c29c06d930b219409d940c5e570e6a7',
     'clipon/lib/License.php' => '54bbfd0d3f56e38a149671925748b4a543d0bc4c69c7ed609f5686b9712774c2',
-    'clipon/lib/CoreUpdater.php' => 'af4cf45aa498e663d1ba77539d69bf4912c88e49a166455cae2aebf53dab47d9',
+    'clipon/lib/CoreUpdater.php' => 'e79e4d1f521ad31646553e5a85ca1a661954527c371d6d9c1236416cd1246467',
     'clipon/lib/CoreUpdateInstaller.php' => '74bd0b8562e5a7a1daa8cbfebe725b99f616160070093e4f30cea757f82920a7',
     'clipon/lib/ModuleManager.php' => '64763a968d6877093d77cab996e5d4ec28eeb5a3076b9d8422687be2dc942101',
     'clipon/lib/AssetUrlNormalizer.php' => 'b5af8a463312594a7be7ced614ee284d291a5f5fec794a94380107112e2240f9',
