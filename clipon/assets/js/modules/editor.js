@@ -212,7 +212,8 @@ export function setupEditors(pageSlug, pageType) {
         if (!key) return;
 
         if (el.tagName === 'IMG') {
-            el.addEventListener('click', () => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const modal = document.getElementById('media-modal');
                 if (modal) {
                     mediaState.currentImage = el;
@@ -239,6 +240,7 @@ export function setupEditors(pageSlug, pageType) {
         }
 
         el.addEventListener('click', function(e) {
+            e.stopPropagation();
             if (this.classList.contains('clipon-editing')) return;
             
             const mode = (String(pageType).toLowerCase() === 'blog' && !isTextContainer(this)) ? 'full' : 'base';

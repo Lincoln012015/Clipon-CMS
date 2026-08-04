@@ -4,7 +4,7 @@
  */
 
 import { initBaseUI, initMediaModal } from './modules/ui.js';
-import { setupEditors } from './modules/editor.js?v=entities-decode-20260609';
+import { setupEditors } from './modules/editor.js?v=nested-events-20260804';
 import { createVersion } from './modules/api.js';
 import { handleUpload } from './modules/media.js';
 import { ensureStyleLoaded, loadScriptOnce } from './modules/utils.js?v=entities-decode-20260609';

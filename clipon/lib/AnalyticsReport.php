@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/AnalyticsStorage.php';
-require_once __DIR__ . '/AnalyticsReportCache.php';
+require_once __DIR__ . '/AnalyticsDayReader.php';
 
 /**
  * Base analytics reporting for Dashboard (core).
@@ -15,7 +15,6 @@ class AnalyticsReport {
     }
 
     public function getBasicStats(string $from, string $to): array {
-        $files = $this->storage->listDataFiles();
         $result = [
             'total_hits' => 0,
             'total_uniques' => 0,
@@ -24,45 +23,14 @@ class AnalyticsReport {
         ];
         $visitors = [];
 
-        foreach ($files as $file) {
-            $name = basename($file, '.php');
-            $data = $this->storage->loadData($file);
-
-            if (strlen($name) === 10 && in_array(($data['version'] ?? null), [2, 3], true)) {
-                if ($name >= $from && $name <= $to) {
-                    // Open v3 days are authoritative: their state may be newer than
-                    // an existing snapshot produced by an earlier compaction.
-                    if ($this->hasLiveState($name)) {
-                        continue;
-                    }
-                    $hits = (int)($data['summary']['pageviews'] ?? $data['summary']['hits'] ?? 0);
-                    $result['total_hits'] += $hits;
-                    foreach (($data['visitors'] ?? []) as $hash => $_) {
-                        if (is_string($hash) && $hash !== '') $visitors[$hash] = true;
-                    }
-                    $result['daily'][$name] = [
-                        'hits' => $hits,
-                        'uniques' => $data['summary']['uniques'] ?? 0
-                    ];
-                    $this->mergeCounts($result['top_pages'], $data['pages'] ?? []);
-                }
+        foreach ((new AnalyticsDayReader($this->storage))->readRange($from, $to) as $date => $data) {
+            $hits = (int)($data['summary']['pageviews'] ?? $data['summary']['hits'] ?? 0);
+            $result['total_hits'] += $hits;
+            foreach (($data['visitors'] ?? []) as $hash => $_) {
+                if (is_string($hash) && $hash !== '') $visitors[$hash] = true;
             }
-        }
-
-        $cursor = strtotime($from . ' 00:00:00 UTC');
-        $end = strtotime($to . ' 00:00:00 UTC');
-        $cache = new AnalyticsReportCache($this->storage->getDataDir());
-        while ($cursor !== false && $end !== false && $cursor <= $end) {
-            $date = gmdate('Y-m-d', $cursor);
-            if ($this->hasLiveState($date)) {
-                $data = $cache->load($date);
-                $hits = (int)($data['summary']['pageviews'] ?? 0);
-                $result['total_hits'] += $hits;
-                foreach (($data['visitors'] ?? []) as $hash => $_) if (is_string($hash) && $hash !== '') $visitors[$hash] = true;
-                $result['daily'][$date] = ['hits' => $hits, 'uniques' => (int)($data['summary']['uniques'] ?? 0)];
-                $this->mergeCounts($result['top_pages'], $data['pages'] ?? []);
-            }
-            $cursor += 86400;
+            $result['daily'][$date] = ['hits' => $hits, 'uniques' => (int)($data['summary']['uniques'] ?? 0)];
+            $this->mergeCounts($result['top_pages'], $data['pages'] ?? []);
         }
 
         $result['total_uniques'] = count($visitors);
@@ -70,10 +38,6 @@ class AnalyticsReport {
         $result['top_pages'] = array_slice($result['top_pages'], 0, 5, true);
 
         return $result;
-    }
-
-    private function hasLiveState(string $date): bool {
-        return is_dir(rtrim($this->storage->getDataDir(), '/\\') . '/state/' . $date);
     }
 
     protected function mergeCounts(array &$target, array $source): void {

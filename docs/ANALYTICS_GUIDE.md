@@ -4,7 +4,7 @@ Clipon CMS analytics consists of core data collection and a PRO tier for advance
 
 Since CMS 0.10.0, loading a public URL is not itself counted as a page view. A page view is accepted only after the rendered page becomes visible and the first-party tracker submits a valid, short-lived signed event. The server verifies the token, path, origin, replay state, and rate limits before creating visitor/session state. Command-line requests, previews, most crawlers, probes, and error pages therefore do not enter product analytics.
 
-Scroll depth and visible engagement time are monotonic: retries can only preserve or increase the saved maximum. Conversions are deduplicated by page view and key. Restoring a page from the browser back/forward cache requests a fresh token instead of replaying the original view.
+Scroll depth and visible engagement time are monotonic: retries can only preserve or increase the saved maximum. Conversions are deduplicated by page view and key. The browser renews the signed token for an active page without creating another page view; restoring a page from the browser back/forward cache starts a fresh page-view cycle instead of replaying the original one.
 
 ## Availability: Core, Locked Preview, and PRO
 
@@ -21,7 +21,7 @@ Scroll depth and visible engagement time are monotonic: retries can only preserv
 | Direct JavaScript conversion tracking | No | Yes |
 | Filtering of bots, probe requests, and technical traffic | Yes | Yes |
 
-The funnel and attribution toggles in **Settings > Analytics** (`enable_funnels`, `enable_attribution`) are enabled by default as a locked PRO preview. Core daily analytics files are still kept locally, but funnel/attribution logic and real advanced reports are activated only when the `pro_analytics` module is available.
+The funnel and attribution toggles in **Settings > Analytics** (`enable_funnels`, `enable_attribution`) are enabled by default as a locked PRO preview. Core keeps and derives the required local data in schema v3; the `pro_analytics` module unlocks the real reports and funnel configuration UI.
 
 The locked preview is informational only: it does not provide Funnel CRUD or real funnel/attribution results.
 
@@ -32,7 +32,7 @@ The locked preview is informational only: it does not provide Funnel CRUD or rea
 Two modes are available in **Settings > Analytics**:
 
 - **Privacy/basic without cookies** — the default mode. The CMS does not set a visitor cookie for analytics and does not create a PHP session cookie for anonymous public requests. It counts views, pages, UTM, external referrers, devices, languages, countries, and daily unique visitors via a short-lived daily hash. Raw IP addresses and User-Agent strings are not stored.
-- **Full analytics after consent** — the extended mode. Before consent, it works like privacy/basic. After clicking Accept, the CMS may set a first-party visitor cookie only when the server accepts the first client `page_view`; a GET alone does not create an analytics session. Funnels and attribution additionally depend on the availability of `pro_analytics` and the corresponding toggles.
+- **Full analytics after consent** — the extended mode. Before consent, it works like privacy/basic. After clicking Accept, the CMS may set a first-party visitor cookie only when the server accepts the first client `page_view`; a GET alone does not create an analytics session. This provides more stable visitor/session continuity. In privacy/basic mode, visitor identity is intentionally day-scoped, so cross-day journeys and attribution are limited.
 
 If the cookie banner is disabled, the CMS always uses privacy/basic mode, even if full analytics is selected in the settings.
 
@@ -157,10 +157,14 @@ A funnel is a sequence of steps (URLs) that a user must go through to reach a go
      ```
    - **Strict order**: if this checkbox is enabled, the system will count a transition only if the user visited `/cart` BEFORE `/checkout`. If the checkbox is not enabled, any paths containing these pages are counted.
 
-### Data analysis:
-- **Conversion**: shows the percentage of users who moved from the previous step to the next one.
-- **Exit paths**: if a user didn't follow the funnel, you'll see exactly where they went instead of the next step.
-- **Average path length**: helps you understand how convoluted the path to the goal is.
+### Data analysis
+
+Schema v3 records the normalized page journey that led to each conversion (up to 20 path changes). The report shows completed paths, recent runs, and average path length. A saved funnel is a filter over those completed conversion paths:
+
+- with **Strict order**, its steps must appear in the configured order;
+- without it, every configured step must appear, in any order.
+
+The current report does not calculate per-step abandonment or exit-path percentages. A saved funnel affects report filtering; it does not change collection of the underlying journey.
 
 ---
 
@@ -170,12 +174,17 @@ This section applies only after the `pro_analytics` module is installed and acti
 
 Attribution helps you understand **where** the users who completed a target action (conversion) came from.
 
-### How it works:
-The system tracks the `utm_source`, `utm_medium`, and `utm_campaign` parameters, as well as the `Referer` (the site the visit came from).
+### How it works
+
+Traffic sources are counted per analytics session. A UTM campaign has priority over an external referrer; otherwise the session is classified as external or direct. Internal referrers are tracked separately and do not become acquisition sources.
+
+The system stores normalized `utm_source`, `utm_medium`, and `utm_campaign` values plus the external referrer host. It does not store the full referrer URL.
 
 ### Attribution models:
-1. **First Touch**: all "credit" for the conversion goes to the very first source through which the user first reached the site. Useful for evaluating reach and engagement.
-2. **Last Touch**: all credit goes to the last source before the conversion. Useful for evaluating direct impact on sales.
+1. **First Touch**: credit goes to the source at the start of the converting session.
+2. **Last Touch**: credit goes to the most recent attributable UTM campaign or external source before the conversion. Later direct or internal navigation does not overwrite an earlier attributable source.
+
+Attribution is conversion-based: no attribution row is created until a configured conversion occurs. Privacy/basic visitor identifiers are day-scoped, so reports do not claim cross-day identity in that mode.
 
 ### Page-based conversion setup:
 For data to appear in the attribution report, you need to:
@@ -200,21 +209,17 @@ document.querySelector('#lead-form').addEventListener('submit-success', function
 </script>
 ```
 
-The optional second argument records the page/path associated with the conversion. If omitted, the current pathname is used:
-
-```js
-window.cliponAnalytics?.trackConversion('purchase', '/booking/complete');
-```
-
 Type keys may contain lowercase Latin letters, digits, underscores, and hyphens, and are limited to 48 characters. The CMS supports up to 40 custom conversion types.
 
 The helper sends a versioned `conversion` event to the standard public analytics endpoint with the page token and page-view identifier. The server accepts only configured, enabled keys and deduplicates each key within that page view; arbitrary keys and events sent before the accepted page view are rejected.
 
-Direct conversions contribute to total conversions, conversions by page and type, recent conversions, and PRO reports. Page-based conversions through `config/conversions.php` continue to work independently.
+Direct conversions contribute to total conversions, conversions by page and type, recent conversions, completed journeys, attribution, and PRO reports. The conversion is associated with the current token path. Page-based conversions through `config/conversions.php` continue to work independently.
+
+Server-side integrations in `pro_analytics` write a synthetic schema-v3 conversion state. They do not manufacture a page view, unique visitor, session, traffic-source visit, or engagement event. A stable integration dedupe ID can be supplied to prevent the same business conversion from being counted twice.
 
 ---
 
 ## PRO Analytics: Filtering Funnel and Attribution Reports
-In both tabs, you can select a time range for analysis. Data is updated in real time based on visit logs.
+In both tabs, you can select a time range for analysis. Open-day schema-v3 state is included through the shared report reader, so reports do not wait for daily compaction.
 
 This period filter applies to the PRO funnel and attribution reports described above.

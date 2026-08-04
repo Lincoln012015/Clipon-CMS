@@ -122,10 +122,17 @@ class Renderer {
 
         // 4. Find all 'clipon' elements and replace content
         // We support: data-key, id, and automatic index (clipon_0, clipon_1...)
-        $nodes = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' clipon ')]");
+        $nodeList = $xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' clipon ')]");
+        // DOMNodeList is live. Snapshot it before replacing element contents so
+        // nested editable nodes keep valid PHP wrappers during this render pass.
+        $nodes = $nodeList !== false ? iterator_to_array($nodeList, false) : [];
         $index = 0;
 
         foreach ($nodes as $node) {
+            if (!$node instanceof DOMElement) {
+                continue;
+            }
+
             $key = $node->getAttribute('data-key');
             if (!$key) $key = $node->getAttribute('id');
             if (!$key) $key = 'clipon_' . $index;

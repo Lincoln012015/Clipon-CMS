@@ -64,28 +64,65 @@ class AnalyticsStorage {
         $retentionMonths = (int)($settings['analytics_retention'] ?? 36);
         if ($retentionMonths <= 0) return;
 
-        $files = glob($this->dataDir . '/*.php');
-        $limitDate = date('Y-m', strtotime("-$retentionMonths months"));
+        $limitDate = gmdate('Y-m', strtotime("-$retentionMonths months UTC"));
 
-        foreach ($files as $file) {
+        foreach (glob($this->dataDir . '/*.php') ?: [] as $file) {
             $name = basename($file, '.php');
-            $compareName = (strlen($name) === 10) ? substr($name, 0, 7) : $name;
+            if (!preg_match('/^\d{4}-\d{2}(?:-\d{2})?$/', $name)) continue;
+            $compareName = substr($name, 0, 7);
 
-            if (strlen($compareName) === 7 && $compareName < $limitDate) {
+            if ($compareName < $limitDate) {
                 @unlink($file);
             }
         }
 
+        foreach (glob($this->dataDir . '/state/*', GLOB_ONLYDIR) ?: [] as $dir) {
+            $date = basename($dir);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && substr($date, 0, 7) < $limitDate) {
+                self::removeTree($dir);
+            }
+        }
+
+        foreach (glob($this->dataDir . '/cache/*.php') ?: [] as $file) {
+            $date = basename($file, '.php');
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && substr($date, 0, 7) < $limitDate) {
+                @unlink($file);
+            }
+        }
     }
 
     public function clearAllData(): bool {
-        $files = glob($this->dataDir . '/*.php');
         $success = true;
-        foreach ($files as $file) {
+        foreach (glob($this->dataDir . '/*.php') ?: [] as $file) {
             if (!@unlink($file)) $success = false;
         }
 
+        foreach (['state', 'cache', 'rate'] as $directory) {
+            $path = rtrim($this->dataDir, '/\\') . '/' . $directory;
+            if (file_exists($path) && !self::removeTree($path)) $success = false;
+        }
+
+        foreach (['analytics_sys.log', 'analytics.lock', 'event_rate.lock'] as $name) {
+            $path = rtrim($this->dataDir, '/\\') . '/' . $name;
+            if (file_exists($path) && !@unlink($path)) $success = false;
+        }
+
         return $success;
+    }
+
+    private static function removeTree(string $path): bool {
+        if (is_link($path) || is_file($path)) return @unlink($path);
+        if (!is_dir($path)) return true;
+
+        $success = true;
+        $items = scandir($path);
+        if ($items === false) return false;
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            if (!self::removeTree($path . DIRECTORY_SEPARATOR . $item)) $success = false;
+        }
+
+        return @rmdir($path) && $success;
     }
 
     public function listDataFiles(): array {

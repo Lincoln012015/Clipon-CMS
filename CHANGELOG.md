@@ -2,28 +2,32 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.12.0
+
+- Fixed Dashboard and Pro Analytics failing to show the latest collected data.
+- Improved long-visit tracking so engagement, scroll depth, and conversions continue to be recorded without creating duplicate page views.
+- Added complete traffic-source, referrer, first-touch and last-touch attribution, and conversion-funnel reporting for current analytics data.
+- Improved analytics storage maintenance with automatic daily compaction, retention support, and complete data clearing.
+- Fixed server-side conversions so they appear in current analytics without inflating page-view, visitor, or session totals.
+
 ## 0.11.1
 
-- Fixed the **Install Core update** button remaining visible when no newer Core version is available, including when stale update metadata exists.
-- Changed the named GitHub Release ZIP to contain only the installable CMS runtime (`index.php`, `.htaccess`, `clipon/`) and `LICENSE`, while keeping documentation and project assets in the public repository.
-- Added deterministic archive-content validation that rejects documentation, screenshots, and other repository-only files from the runtime ZIP.
-- Added separate public-export and runtime-ZIP file counts to the GitHub Actions release summary.
+- Fixed the **Install Core update** button remaining visible when no newer Core version is available.
+- Reduced the downloadable CMS package to the files required for installation, excluding documentation, screenshots, and repository-only files.
 
 ## 0.11.0
 
 - Added authenticated one-click Core installation from the CMS administration panel.
-- Made SHA-256 verification mandatory before extraction or installation and reject missing, malformed, or mismatched checksums.
-- Added safe ZIP extraction with traversal protection, release-version validation, integrity-manifest verification, archive limits, and downgrade prevention.
-- Preserve site-owned runtime data during Core replacement, retain the previous Core under `.clipon_backups/core_updates`, and automatically roll back partial installations.
-- Added CI coverage for branch pushes and pull requests, including repository audits, PHP checks, Core smoke tests, deterministic public export verification, and license-server tests.
-- Added regression tests for valid installation, checksum failures, corrupt archives, unsafe ZIP paths, integrity failures, repeated versions, runtime-data preservation, and rollback.
+- Added mandatory SHA-256 and package-integrity verification before a Core update is installed.
+- Added protection against unsafe or corrupted update archives and prevented installing the same or an older version.
+- Preserved site content, configuration, uploads, templates, modules, and other runtime data during Core updates.
+- Added automatic backup and rollback when an update cannot be completed safely.
 
 ## 0.10.3
 
-- Added the automated Core release pipeline that publishes the sanitized public source, immutable GitHub tag, ZIP archive, and SHA-256 checksum from one deterministic export.
-- Integrated stable releases with the protected license-server Release API and added end-to-end verification of public metadata, the CMS update API, and the latest-download redirect.
-- Replaced version-specific website and Core download URLs with the permanent `https://server.clipon-cms.com/download/latest` endpoint.
-- Added regression coverage for release workflow helpers, stable download links, and preservation of Core update version, package URL, changelog, and SHA-256 metadata.
+- Added CMS release packages with published SHA-256 checksums.
+- Added a permanent latest-version download link so website download buttons no longer depend on a specific release number.
+- Improved update information with consistent version, download URL, changelog, and checksum metadata.
 
 ## 0.10.2
 

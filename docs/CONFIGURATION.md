@@ -80,7 +80,9 @@ Runtime update cache is stored in `config/updates.php`. It is not the source of 
 
 ### Analytics event security
 
-The analytics pipeline stores `analytics_signing_keys` as a `kid => secret` map and `analytics_active_kid` as the key used for newly issued page tokens. CMS 0.10.0 generates and saves a random 256-bit key on first use. Keep the previous key in the map during rotation until all ten-minute tokens issued with it have expired. Never publish these values.
+The analytics pipeline stores `analytics_signing_keys` as a `kid => secret` map and `analytics_active_kid` as the key used for newly issued and renewed page tokens. The CMS generates and saves a random 256-bit key on first use. Keep a previous key in the map until both the ten-minute token lifetime and the bounded renewal recovery window have passed (currently at least 70 minutes after the last token was issued with that key). Never publish these values.
+
+The public tracker renews an active page token approximately every eight minutes and retries a failed renewal after 30 seconds. Renewal preserves the page-view identifier and path, so it does not create a duplicate page view. Back/forward-cache restoration is different: it requests a fresh page-view cycle.
 
 Bot-filter allowlist entries must use an explicit `ua:<fragment>` or `path:<path-or-prefix>` form. Empty and overly broad entries such as `/`, `mozilla`, or `chrome` are discarded. Allowlisting bypasses only heuristic bot/probe matching; token expiry, replay protection, origin checks, and rate limiting still apply.
 

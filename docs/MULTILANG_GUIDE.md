@@ -130,7 +130,7 @@ Blog posts work similarly to pages:
 
 ## 6. Analytics
 
-Language-based analytics is available when the site has active language versions. In base core, analytics may show basic or locked/promo data depending on the installed modules.
+Language-based analytics is collected and shown by Core when the site has active language versions. Optional analytics modules unlock advanced reports, but the Dashboard language counts are real Core data.
 
 You can track the popularity of each language version:
 - Go to the **Analytics** section.

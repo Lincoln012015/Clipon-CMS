@@ -51,4 +51,4 @@ Provider modules should store only token hashes, compare them in constant time, 
 
 ## Analytics Privacy
 
-Privacy/basic analytics avoids visitor cookies for anonymous public requests. Full analytics requires cookie banner acceptance and can use visitor/session state.
+Privacy/basic analytics avoids visitor cookies for anonymous public requests. Full analytics requires cookie banner acceptance and can use visitor/session state. A public GET is not counted by itself: the visible-page tracker must submit a short-lived, path-bound HMAC token. Active pages renew that token under the same page-view identifier, while replay and events submitted before an accepted page view remain rejected.

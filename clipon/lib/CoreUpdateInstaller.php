@@ -268,6 +268,8 @@ class CoreUpdateInstaller
             throw new RuntimeException('core_not_writable');
         }
 
+        $this->normalizeReleasePermissions($stage);
+
         $backupDir = $this->backupRoot . '/backup-' . preg_replace('/[^0-9A-Za-z._-]/', '-', $version) . '-' . gmdate('YmdHis') . '-' . bin2hex(random_bytes(4));
         if (!@mkdir($backupDir, 0700, true) && !is_dir($backupDir)) {
             throw new RuntimeException('backup_directory_unavailable');
@@ -302,7 +304,7 @@ class CoreUpdateInstaller
                     continue;
                 }
                 $temp = $this->root . '/.clipon-update-' . $rootFile . '-' . bin2hex(random_bytes(4));
-                if (!@copy($source, $temp) || !@rename($temp, $this->root . '/' . $rootFile)) {
+                if (!@copy($source, $temp) || !@chmod($temp, 0644) || !@rename($temp, $this->root . '/' . $rootFile)) {
                     @unlink($temp);
                     throw new RuntimeException('root_file_replace_failed');
                 }
@@ -325,6 +327,54 @@ class CoreUpdateInstaller
         }
 
         return $backupDir;
+    }
+
+    private function normalizeReleasePermissions(string $stage): void
+    {
+        $core = $stage . '/clipon';
+        if (!is_dir($core) || !$this->normalizeTreePermissions($core)) {
+            throw new RuntimeException('permission_normalization_failed');
+        }
+
+        foreach (['index.php', '.htaccess'] as $rootFile) {
+            $path = $stage . '/' . $rootFile;
+            if (is_file($path) && !@chmod($path, 0644)) {
+                throw new RuntimeException('permission_normalization_failed');
+            }
+        }
+    }
+
+    private function normalizeTreePermissions(string $path): bool
+    {
+        if (is_link($path) || !is_dir($path) || !@chmod($path, 0755)) {
+            return false;
+        }
+
+        $items = scandir($path);
+        if (!is_array($items)) {
+            return false;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $child = $path . '/' . $item;
+            if (is_link($child)) {
+                return false;
+            }
+            if (is_dir($child)) {
+                if (!$this->normalizeTreePermissions($child)) {
+                    return false;
+                }
+                continue;
+            }
+            if (!is_file($child) || !@chmod($child, 0644)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function createWorkDir(): ?string

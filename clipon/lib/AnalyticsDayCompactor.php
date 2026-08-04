@@ -4,6 +4,7 @@ require_once __DIR__ . '/AnalyticsPageviewStateStore.php';
 require_once __DIR__ . '/AnalyticsV3Reducer.php';
 
 final class AnalyticsDayCompactor {
+    public const GRACE_SECONDS = 93600;
     private string $dir;
     private AnalyticsPageviewStateStore $states;
 
@@ -14,13 +15,12 @@ final class AnalyticsDayCompactor {
 
     public function compact(string $date, bool $force = false): array {
         if (!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $date)) throw new InvalidArgumentException('invalid_date');
-        if (!$force && strtotime($date . ' 00:00:00 UTC') > time() - 93600) throw new RuntimeException('grace_period');
+        if (!$force && !self::isEligible($date)) throw new RuntimeException('grace_period');
         $stateDir = $this->dir . '/state/' . $date;
         if (!is_dir($stateDir)) return [];
         $lock = @fopen($stateDir . '/compaction.lock', 'c');
         if ($lock === false || !flock($lock, LOCK_EX)) throw new RuntimeException('storage_error');
         try {
-            $this->states->close($date);
             $manifest = $this->states->manifest($date);
             $data = AnalyticsV3Reducer::reduce($this->states->loadDay($date), $manifest, true);
             $file = $this->dir . '/' . $date . '.php';
@@ -29,9 +29,16 @@ final class AnalyticsDayCompactor {
             if (@file_put_contents($tmp, $content, LOCK_EX) === false || !@rename($tmp, $file)) throw new RuntimeException('storage_error');
             $verify = json_decode(str_replace("<?php die(); ?>\n", '', (string)file_get_contents($file)), true);
             if (!is_array($verify) || ($verify['source_manifest'] ?? null) !== $manifest) throw new RuntimeException('checksum_mismatch');
+            $this->states->close($date);
             return $data;
         } finally {
             flock($lock, LOCK_UN); fclose($lock);
         }
+    }
+
+    public static function isEligible(string $date, ?int $now = null): bool {
+        if (!preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $date)) return false;
+        $start = strtotime($date . ' 00:00:00 UTC');
+        return $start !== false && $start <= ($now ?? time()) - self::GRACE_SECONDS;
     }
 }

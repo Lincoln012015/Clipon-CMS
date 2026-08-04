@@ -39,7 +39,13 @@
 - Confirm request is a GET HTML request with a normal browser User-Agent.
 - Check bot allowlist/denylist.
 - Confirm analytics mode and cookie consent configuration.
-- Check `data/analytics/` write permissions.
+- Check write permissions for `data/analytics/`, especially `state/`, `cache/`, and `rate/`.
+- Inspect the current UTC day under `data/analytics/state/YYYY-MM-DD/`. Current data is expected there before compaction; the absence of a root daily file for today is not an error.
+- Delete only `data/analytics/cache/YYYY-MM-DD.php` to force a safe report rebuild. Do not delete an open state directory.
+- Confirm the public page loads `clipon/assets/js/analytics.js` and that `track_event.php` accepts the initial `page_view` before later events.
+- If long-lived tabs stop recording, inspect token-renewal requests. Renewal normally runs every eight minutes and preserves the existing page view.
+
+If Dashboard has current data but a PRO report stops at an older date, verify that `pro_analytics` is active and uses the shared `AnalyticsDayReader`. Reports must read open v3 state before compacted v3 or legacy v2 data. A closed day is compacted automatically on the first report request after the grace period.
 
 ## License Or Update Errors
 

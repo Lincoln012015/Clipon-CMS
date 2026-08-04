@@ -328,7 +328,7 @@ if (file_exists($templatePath)) {
         $renderer = new Renderer($templatePath, $renderData);
         clipon_track_public_request();
         echo $renderer->render();
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
         clipon_track_public_request();
         error_log('Clipon render error: ' . $e->getMessage());

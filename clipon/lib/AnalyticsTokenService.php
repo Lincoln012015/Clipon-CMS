@@ -7,6 +7,7 @@ final class AnalyticsTokenService {
     private const VERSION = 1;
     private const TTL = 600;
     private const CLOCK_SKEW = 30;
+    private const RENEWAL_GRACE = 3600;
 
     private array $keys;
     private string $activeKid;
@@ -50,11 +51,25 @@ final class AnalyticsTokenService {
             'mode' => $mode === CookieConsentPolicy::MODE_FULL ? CookieConsentPolicy::MODE_FULL : CookieConsentPolicy::MODE_BASIC,
             'ctx' => $this->sanitizeContext($context),
         ];
-        $encoded = self::base64UrlEncode((string)json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-        return ['pageview_id' => $id, 'token' => $encoded . '.' . self::base64UrlEncode(hash_hmac('sha256', $encoded, $this->keys[$this->activeKid], true)), 'payload' => $payload];
+        return $this->sign($payload);
     }
 
-    public function verify(string $token, ?int $now = null): array {
+    public function renew(string $token, string $pageviewId, string $path, ?int $now = null): array {
+        $now = $now ?? time();
+        $payload = $this->verify($token, $now, true);
+        $path = self::normalizePath($path);
+        if (!hash_equals((string)$payload['jti'], $pageviewId)
+            || !hash_equals((string)$payload['path'], $path)) {
+            throw new InvalidArgumentException('invalid_token');
+        }
+
+        $payload['kid'] = $this->activeKid;
+        $payload['iat'] = $now;
+        $payload['exp'] = $now + self::TTL;
+        return $this->sign($payload);
+    }
+
+    public function verify(string $token, ?int $now = null, bool $allowRecentlyExpired = false): array {
         $parts = explode('.', $token);
         if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
             throw new InvalidArgumentException('invalid_token');
@@ -71,8 +86,9 @@ final class AnalyticsTokenService {
             throw new InvalidArgumentException('invalid_token');
         }
         $now = $now ?? time();
+        $expiredBefore = $allowRecentlyExpired ? $now - self::RENEWAL_GRACE : $now - self::CLOCK_SKEW;
         if (!is_int($payload['iat'] ?? null) || !is_int($payload['exp'] ?? null)
-            || $payload['iat'] > $now + self::CLOCK_SKEW || $payload['exp'] < $now - self::CLOCK_SKEW) {
+            || $payload['iat'] > $now + self::CLOCK_SKEW || $payload['exp'] < $expiredBefore) {
             throw new InvalidArgumentException('expired_token');
         }
         if (!preg_match('/^[a-f0-9]{32}$/', (string)($payload['jti'] ?? ''))
@@ -81,6 +97,16 @@ final class AnalyticsTokenService {
             throw new InvalidArgumentException('invalid_token');
         }
         return $payload;
+    }
+
+    private function sign(array $payload): array {
+        $payload['kid'] = $this->activeKid;
+        $encoded = self::base64UrlEncode((string)json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        return [
+            'pageview_id' => (string)$payload['jti'],
+            'token' => $encoded . '.' . self::base64UrlEncode(hash_hmac('sha256', $encoded, $this->keys[$this->activeKid], true)),
+            'payload' => $payload,
+        ];
     }
 
     public static function normalizePath(string $path): string {

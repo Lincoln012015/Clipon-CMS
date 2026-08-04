@@ -82,6 +82,10 @@ final class AnalyticsPageviewStateStore {
         }
     }
 
+    public function isClosed(string $date): bool {
+        return is_file($this->dataDir . '/state/' . $date . '/.closed');
+    }
+
     private function ensureDir(string $dir): bool {
         return is_dir($dir) || @mkdir($dir, 0755, true);
     }

@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/AnalyticsPageviewStateStore.php';
 require_once __DIR__ . '/AnalyticsV3Reducer.php';
+require_once __DIR__ . '/AnalyticsDayCompactor.php';
 
 final class AnalyticsReportCache {
     private string $dir;
@@ -13,6 +14,15 @@ final class AnalyticsReportCache {
     }
 
     public function load(string $date): array {
+        if (!$this->states->isClosed($date) && AnalyticsDayCompactor::isEligible($date)) {
+            try {
+                return (new AnalyticsDayCompactor($this->dir))->compact($date);
+            } catch (Throwable $e) {
+                // Reporting remains available from live state; a later request
+                // will retry compaction after transient storage failures.
+            }
+        }
+
         $manifest = $this->states->manifest($date);
         $file = $this->dir . '/cache/' . $date . '.php';
         if (is_file($file) && time() - (int)filemtime($file) <= 60) {

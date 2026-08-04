@@ -5,6 +5,7 @@
     let config;
     try { config = JSON.parse(node.textContent || "{}"); } catch (_) { return; }
     let sequence = 0, sentPageView = false, visibleSeconds = 0, lastTick = 0, lastHeartbeat = 0, scrollMax = 0;
+    let tokenRefreshTimer = 0, tokenRefreshPending = false;
     const envelope = (type, data) => ({
         version: 1, type: type, pageview_id: config.pageviewId, path: config.path,
         token: config.token, sequence: ++sequence, data: data || {}
@@ -20,6 +21,22 @@
     function pageView() {
         if (sentPageView || document.visibilityState !== "visible") return;
         sentPageView = true; lastTick = performance.now(); send("page_view", {}, false);
+    }
+    function scheduleTokenRefresh(delay) {
+        clearTimeout(tokenRefreshTimer);
+        tokenRefreshTimer = setTimeout(refreshToken, delay);
+    }
+    function refreshToken() {
+        if (tokenRefreshPending) return;
+        tokenRefreshPending = true;
+        fetch(config.tokenEndpoint, {method: "POST", credentials: "same-origin",
+            headers: {"Content-Type": "application/json", "Accept": "application/json"},
+            body: JSON.stringify({pageview_id: config.pageviewId, token: config.token, path: config.path})})
+            .then(r => r.ok ? r.json() : Promise.reject()).then(next => {
+                if (next.pageview_id !== config.pageviewId || typeof next.token !== "string") return Promise.reject();
+                config.token = next.token; config.path = next.path; scheduleTokenRefresh(480000);
+            }).catch(function () { scheduleTokenRefresh(30000); })
+            .finally(function () { tokenRefreshPending = false; });
     }
     function tick() {
         const now = performance.now();
@@ -41,7 +58,8 @@
         fetch(config.tokenEndpoint + "?path=" + encodeURIComponent(location.pathname), {credentials: "same-origin", headers: {"Accept": "text/html"}})
             .then(r => r.ok ? r.json() : Promise.reject()).then(next => {
                 config.pageviewId = next.pageview_id; config.token = next.token; config.path = next.path;
-                sequence = 0; sentPageView = false; visibleSeconds = 0; lastHeartbeat = 0; scrollMax = 0; pageView();
+                sequence = 0; sentPageView = false; visibleSeconds = 0; lastHeartbeat = 0; scrollMax = 0;
+                scheduleTokenRefresh(480000); pageView();
             }).catch(function () {});
     }
     window.cliponAnalytics = window.cliponAnalytics || {};
@@ -63,5 +81,6 @@
         });
     }, {passive: true});
     setInterval(tick, 1000);
+    scheduleTokenRefresh(480000);
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pageView); else pageView();
 })();

@@ -34,8 +34,9 @@ final class AnalyticsEventIngestor {
             }
 
             $acceptedAt = time();
+            $acceptedAtUs = (int)floor(microtime(true) * 1000000);
             $date = gmdate('Y-m-d', $acceptedAt);
-            return $this->states->update($date, $event->pageviewId, function(?array $state) use ($event, $token, $server, $acceptedAt, $date) {
+            return $this->states->update($date, $event->pageviewId, function(?array $state) use ($event, $token, $server, $acceptedAt, $acceptedAtUs, $date) {
                 if ($event->type === 'page_view') {
                     if ($state !== null) return ['state' => $state, 'accepted' => true, 'duplicate' => true];
                     $visitor = $this->visitorHash($token, $server, $date);
@@ -44,6 +45,7 @@ final class AnalyticsEventIngestor {
                         'mode' => $token['mode'],
                         'created_at' => (int)$token['iat'],
                         'accepted_at' => $acceptedAt,
+                        'accepted_at_us' => $acceptedAtUs,
                         'last_seen_at' => $acceptedAt,
                         'visitor_hash' => $visitor,
                         'session_id' => $this->sessionId($visitor, $acceptedAt),

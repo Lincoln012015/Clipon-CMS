@@ -31,9 +31,9 @@ Depending on enabled features, Clipon CMS can store:
 - sets first-party visitor/consent cookies;
 - enables session-level metrics such as exit pages, bounce rate, and conversion dedupe after a signed client page view has been accepted.
 
-Direct PRO conversions use the active analytics privacy mode. Privacy/basic mode does not create an analytics visitor cookie and deduplicates a conversion using the page-view identifier. Full-with-consent mode can use session state and suppresses repeated instances of the same type and path within a five-minute window. Conversion records do not store the raw referrer URL; only its normalized host is retained.
+Browser PRO conversions use the active analytics privacy mode and are deduplicated by page-view identifier plus conversion key. Server-side PRO conversions are stored as synthetic schema-v3 conversion state and may use a caller-provided stable dedupe ID; they do not add a page view, visitor, session, traffic-source visit, or engagement event. Conversion records do not store the raw referrer URL; only its normalized host is retained.
 
-Analytics tokens contain a normalized path and compact navigation dimensions, expire after ten minutes, and are authenticated with a rotating HMAC key. Daily page-view state stores privacy-safe visitor hashes and normalized browser/network dimensions; it does not store raw IP addresses, raw user-agent strings, complete tokens, or signatures.
+Analytics tokens contain a normalized path and compact navigation dimensions, expire after ten minutes, and are authenticated with a rotating HMAC key. While a page remains active, the browser renews its token under the same page-view identifier; renewal does not increment analytics counters. A recently expired authentic token may be renewed during the bounded recovery window. Daily page-view state stores privacy-safe visitor hashes and normalized browser/network dimensions; it does not store raw IP addresses, raw user-agent strings, complete tokens, or signatures.
 
 ## Cookies
 
@@ -62,7 +62,7 @@ Visitor IP addresses are resolved locally against the downloaded GeoIP data and 
 
 ## Retention
 
-Analytics retention is configurable in Settings. Clipon does not automatically rotate application logs or delete backups. Site operators should configure server-level log rotation and a retention schedule appropriate to their operational and legal requirements, and should periodically remove expired backups from storage.
+Analytics retention is configurable in Settings and applies to schema-v2/v3 daily data, open state, and analytics report caches. The analytics clear action also removes v3 state, rate-limit state, analytics locks, and analytics-specific system logs. Clipon does not automatically rotate unrelated application logs or delete backups. Site operators should configure server-level log rotation and a retention schedule appropriate to their operational and legal requirements, and should periodically remove expired backups from storage.
 
 ## Suggested Site Policy Topics
 
