@@ -67,6 +67,7 @@ class Auth {
             $session->set('role', $user['role']);
             $session->set('permissions', $user['permissions'] ?? []);
             $session->set('login_attempts', 0);
+            Translation::onLogin();
             SessionManager::refreshActivity();
             
             session_regenerate_id(true);

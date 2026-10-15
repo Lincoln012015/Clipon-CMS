@@ -2,6 +2,17 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.12.2
+
+- Persisted the interface language in user profiles and a browser cookie across logins, logouts, and session expiry.
+- Applied the language selected during login or registration to the administration interface and user profile.
+- Used the configured CMS language instead of the first available dictionary as the default interface language.
+- Added Italian interface translation.
+
+## 0.12.1
+
+- Fixed the Markup Editor rejecting templates when browsers normalize protected PHP block markers during HTML serialization.
+
 ## 0.12.0
 
 - Fixed Dashboard and Pro Analytics failing to show the latest collected data.
