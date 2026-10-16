@@ -2,6 +2,13 @@
 
 All notable release-facing changes should be documented here.
 
+## 0.12.3
+
+- Allowed blog list cards in the Markup Editor to use a title or an image, including cards consisting of a single image or heading.
+- Fixed escaped HTML being decoded into active markup when saving pages containing blog shortcode previews.
+- Fixed blog images retaining sample preview URLs instead of dynamic thumbnail placeholders after editing.
+- Preserved original blog templates when changing list settings and retained conditional blocks when editing markup.
+
 ## 0.12.2
 
 - Persisted the interface language in user profiles and a browser cookie across logins, logouts, and session expiry.

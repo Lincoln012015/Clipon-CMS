@@ -16,8 +16,10 @@ class BlogMarkupPreviewAnnotator {
             '{{image}}' => '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22640%22 height=%22360%22 viewBox=%220 0 640 360%22%3E%3Crect width=%22640%22 height=%22360%22 fill=%22%23e5e7eb%22/%3E%3Ctext x=%22320%22 y=%22188%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2228%22 fill=%22%236b7280%22%3EBlog image%3C/text%3E%3C/svg%3E" alt="Sample blog post">',
         ];
 
-        $template = preg_replace_callback('/\{\{if\s+(\w+)\}\}(.*?)\{\{endif\}\}/s', static function(array $matches) use ($vars): string {
-            return !empty($vars['{{' . $matches[1] . '}}'] ?? '') ? $matches[2] : '';
+        // Keep every conditional branch editable and preserve its boundaries.
+        // The saved template must retain conditions, including those around the card.
+        $template = preg_replace_callback('/\{\{(?:if\s+\w+|endif)\}\}/', static function(array $matches): string {
+            return '<!--clipon-blog-condition:' . base64_encode($matches[0]) . '-->';
         }, $template) ?? $template;
 
         return str_replace(array_keys($vars), array_values($vars), $template);
@@ -98,6 +100,7 @@ class BlogMarkupPreviewAnnotator {
                 self::addAttributeToOpeningTag($openingTag, $name, $field),
                 $placeholder
             );
+            $opening = self::addAttributeToOpeningTag($opening, 'data-clipon-blog-original-content', base64_encode($matches[3]));
             return $opening . $matches[3] . '</' . $matches[1] . '>';
         }, $html) ?? $html;
     }

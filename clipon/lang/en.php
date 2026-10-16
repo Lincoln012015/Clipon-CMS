@@ -921,7 +921,7 @@ return [
             'not_selected' => 'Not selected',
             'collapse_sidebar' => 'Collapse sidebar',
             'expand_sidebar' => 'Expand sidebar',
-            'need_list_fields' => 'Select a title field before saving.',
+            'need_list_fields' => 'Select a title or image in the post card before saving.',
             'need_per_page' => 'Per page must be a number from 1 to 50.',
             'need_pagination_wrapper' => 'Select a pagination wrapper outside the post card.',
             'need_thumbnail_image' => 'Select an image element for thumbnail.',

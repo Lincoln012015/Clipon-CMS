@@ -897,7 +897,7 @@ return [
             'not_selected' => 'Nicht ausgewählt',
             'collapse_sidebar' => 'Seitenleiste einklappen',
             'expand_sidebar' => 'Seitenleiste ausklappen',
-            'need_list_fields' => 'Wählen Sie vor dem Speichern ein Titelfeld aus.',
+            'need_list_fields' => 'Wählen Sie vor dem Speichern einen Titel oder ein Bild in der Beitragskarte aus.',
             'need_per_page' => 'Pro Seite muss eine Zahl von 1 bis 50 sein.',
             'need_pagination_wrapper' => 'Wählen Sie einen Paginierungs-Wrapper außerhalb der Beitrags-Karte aus.',
             'need_thumbnail_image' => 'Wählen Sie ein Bildelement für das Vorschaubild aus.',

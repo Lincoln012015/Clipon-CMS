@@ -898,7 +898,7 @@ return [
             'not_selected' => 'Non selezionato',
             'collapse_sidebar' => 'Comprimi barra laterale',
             'expand_sidebar' => 'Espandi barra laterale',
-            'need_list_fields' => 'Seleziona un campo titolo prima di salvare.',
+            'need_list_fields' => 'Seleziona un titolo o un’immagine nella scheda del post prima di salvare.',
             'need_per_page' => 'Il numero per pagina deve essere un numero compreso tra 1 e 50.',
             'need_pagination_wrapper' => 'Seleziona un wrapper di paginazione esterno alla card dell\'articolo.',
             'need_thumbnail_image' => 'Seleziona un elemento immagine per la miniatura.',

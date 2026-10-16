@@ -58,6 +58,8 @@
             selectedBlogTags: utils.sanitizeCsvTokens(tags),
             originalAttrs: Object.assign({}, attrs),
             originalAttrsRaw: seed.attrsRaw || '',
+            originalTemplate: typeof seed.template === 'string' ? seed.template : null,
+            fieldsDirty: false,
             dirty: seed.dirty !== undefined ? !!seed.dirty : true,
             touched: {
                 perPage: !!seed.touchedPerPage,
@@ -762,6 +764,7 @@
             const list = activeList();
             if (!list) return;
             list.dirty = true;
+            list.fieldsDirty = true;
 
             if (tool === 'container') {
                 document.querySelectorAll(`[data-clipon-blog-container="${list.id}"]`).forEach((node) => {
@@ -816,8 +819,9 @@
         function applyPlaceholder(field, element) {
             if (!element) return;
             const originalPlaceholderKey = utils.sanitizeAttrToken(element.getAttribute('data-clipon-blog-placeholder') || '');
-            if (originalPlaceholderKey && field !== 'link') {
-                element.innerHTML = `{{${originalPlaceholderKey}}}`;
+            if (originalPlaceholderKey && field !== 'link' && !(field === 'image' && originalPlaceholderKey === 'thumbnail')) {
+                const originalContent = element.getAttribute('data-clipon-blog-original-content');
+                element.innerHTML = originalContent !== null ? utils.decodeBase64Utf8(originalContent) : `{{${originalPlaceholderKey}}}`;
                 return;
             }
             if (field === 'image') {
@@ -843,7 +847,12 @@
             if (map[field]) element.innerHTML = map[field];
         }
 
-        function cleanNodeHtml(element) {
+        function fieldsInCard(card, list) {
+            const selector = `[data-clipon-blog-field][data-clipon-blog-list="${list.id}"]`;
+            return [...(card.matches(selector) ? [card] : []), ...card.querySelectorAll(selector)];
+        }
+
+        function cleanNodeHtml(element, inner = false) {
             const copy = element.cloneNode(true);
             if (copy.nodeType === Node.ELEMENT_NODE) {
                 copy.removeAttribute('data-clipon-blog-container');
@@ -853,9 +862,14 @@
                 copy.removeAttribute('data-clipon-blog-post-field');
                 copy.removeAttribute('data-clipon-blog-pagination');
                 copy.removeAttribute('data-clipon-blog-placeholder');
+                copy.removeAttribute('data-clipon-blog-original-content');
             }
             cleanup.cleanBlogAttributes(copy);
-            return copy.outerHTML;
+            const html = inner ? copy.innerHTML : copy.outerHTML;
+            return html.replace(/<!--clipon-blog-condition:([A-Za-z0-9+/=]+)-->/g, (marker, encoded) => {
+                const condition = utils.decodeBase64Utf8(encoded);
+                return /^\{\{(?:if\s+\w+|endif)\}\}$/.test(condition) ? condition : marker;
+            });
         }
 
         function paginationTemplateHtml(element) {
@@ -902,19 +916,21 @@
                     return null;
                 }
 
-                const title = card.querySelector(`[data-clipon-blog-field="title"][data-clipon-blog-list="${list.id}"]`);
-                if (!title) {
-                    alert(blogLabels.need_list_fields || 'Select a title field before saving.');
+                const primaryField = fieldsInCard(card, list).find((element) => ['title', 'image'].includes(element.getAttribute('data-clipon-blog-field')));
+                if (!primaryField) {
+                    alert(blogLabels.need_list_fields || 'Select a title or image in the post card before saving.');
                     return null;
                 }
 
-                card.querySelectorAll(`[data-clipon-blog-field][data-clipon-blog-list="${list.id}"]`).forEach((element) => {
+                fieldsInCard(card, list).forEach((element) => {
                     applyPlaceholder(element.getAttribute('data-clipon-blog-field'), element);
                 });
 
                 const pagination = clone.querySelector(`[data-clipon-blog-pagination="${list.id}"]`);
                 const attrs = ' ' + loopAttrs(list, !!pagination);
-                const cardHtml = cleanNodeHtml(card);
+                const cardHtml = !list.fieldsDirty && list.originalTemplate !== null
+                    ? list.originalTemplate
+                    : cleanNodeHtml(preview, true);
                 preview.setAttribute('data-clipon-shortcode-preview', utils.encodeBase64Utf8(`\n[blog_loop${attrs}]\n${cardHtml}\n[/blog_loop]\n`));
 
                 if (pagination) {
@@ -939,13 +955,9 @@
                 return clone;
             }
 
-            const title = clone.querySelector(`[data-clipon-blog-field="title"][data-clipon-blog-list="${list.id}"]`);
-            if (!title) {
-                alert(blogLabels.need_list_fields || 'Select a title field before saving.');
-                return null;
-            }
-            if (!card.contains(title)) {
-                alert(blogLabels.field_card_warning || 'Select fields inside the selected post card.');
+            const primaryField = fieldsInCard(card, list).find((element) => ['title', 'image'].includes(element.getAttribute('data-clipon-blog-field')));
+            if (!primaryField) {
+                alert(blogLabels.need_list_fields || 'Select a title or image in the post card before saving.');
                 return null;
             }
 
@@ -1156,6 +1168,7 @@
                 el.removeAttribute('data-clipon-blog-post-field');
                 el.removeAttribute('data-clipon-blog-pagination');
                 el.removeAttribute('data-clipon-blog-placeholder');
+                el.removeAttribute('data-clipon-blog-original-content');
             });
         }
 
@@ -1400,6 +1413,7 @@
                         name: `${blogLabels.list_default_name || 'List'} ${index}`,
                         attrs,
                         attrsRaw: meta.attrs_raw || '',
+                        template: meta.template,
                         dirty: false,
                     });
                     listsByIndex[index] = list;

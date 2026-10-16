@@ -50,6 +50,7 @@ class MarkupShortcodePreview {
                 'index' => $listIndex,
                 'attrs' => $attrs,
                 'attrs_raw' => trim($matches[2] ?? ''),
+                'template' => $matches[3] ?? '',
             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
             $class = $type === 'blog_loop' ? 'clipon-shortcode-preview-blog-loop' : 'clipon-shortcode-preview-blog-pagination';
             $blogRole = $type === 'blog_loop' ? ' data-clipon-blog-container="1"' : ' data-clipon-blog-pagination="1"';
@@ -95,7 +96,6 @@ class MarkupShortcodePreview {
 
         $result = $dom->saveHTML();
         $result = str_replace('<?xml encoding="utf-8" ?>', '', $result);
-        $result = mb_convert_encoding($result, 'UTF-8', 'HTML-ENTITIES');
         return str_replace(array_keys($replacements), array_values($replacements), $result);
     }
 

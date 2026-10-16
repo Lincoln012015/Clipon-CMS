@@ -93,7 +93,7 @@ return [
         'field_content' => 'Content',
         'field_thumbnail' => 'Thumbnail',
         'per_page' => 'Per page',
-        'need_list_fields' => 'Select a title field before saving.',
+        'need_list_fields' => 'Select a title or image in the post card before saving.',
         'need_per_page' => 'Per page must be a number from 1 to 50.',
         'need_thumbnail_image' => 'Select an image element for thumbnail.',
         'select_tool' => 'Choose a tool, then click an element.',

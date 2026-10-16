@@ -79,7 +79,7 @@ class MarkupHtmlSanitizer {
     }
 
     private static function removeBlogAttributes(string $html): string {
-        return preg_replace('/\s+data-clipon-blog-(?:container|card|field|list|post-field|field-label|pagination|placeholder)=(["\']).*?\1/i', '', $html) ?? $html;
+        return preg_replace('/\s+data-clipon-blog-(?:container|card|field|list|post-field|field-label|pagination|placeholder|original-content)=(["\']).*?\1/i', '', $html) ?? $html;
     }
 
     private static function removeShortcodePreviewClasses(string $html): string {
